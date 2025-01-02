@@ -1,7 +1,6 @@
 package com.example.expensetracker.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,23 +23,19 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex33cc4d
@@ -50,11 +45,14 @@ import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexdedbd4
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
+import com.example.expensetracker.viewModel.AddAccountViewModel
+import com.google.gson.Gson
 
 
 @Composable
 fun AccountScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    addAccountViewModel: AddAccountViewModel
 ) {
 
     BackHandler {
@@ -64,6 +62,10 @@ fun AccountScreen(
             }
         }
     }
+    val getAccountList by addAccountViewModel.getAllRecord().observeAsState(emptyList())
+
+
+
 
     Column( modifier = Modifier
         .fillMaxSize()
@@ -78,7 +80,7 @@ fun AccountScreen(
         ) {
             Button(
                 modifier = Modifier
-                    .padding(top = 16.dp),
+                    .padding(top = 16.dp, bottom = 16.dp),
                 onClick = { },
                 colors = ButtonDefaults.buttonColors(Hex33cc4d, contentColor = HexFFFFFFFF),
                 shape = RoundedCornerShape(4.dp)
@@ -86,21 +88,23 @@ fun AccountScreen(
                 Text("Transfer")
             }
         }
-        val financialSummary = arrayListOf(
-          "Personal","Company 1","Company 2"
-        )
 
-        LazyColumn(modifier = Modifier
-            .wrapContentWidth()
-            .padding( top = 16.dp)) {
-            financialSummary.forEach{ iteam->
-                item {
-                    AccountItem(iteam)
+
+
+                getAccountList.forEach{ item->
+                    AccountItem(
+                        addAccount = item,
+                        onClick = { selectedAccount ->
+                            navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}")
+
+                        }
+                    )
                 }
-            }
 
 
-        }
+
+
+
 
 
 
@@ -136,8 +140,11 @@ fun TopAppBarAccountScreen(navHostController: NavHostController){
                 imageVector = Icons.Default.Add,
                 contentDescription = "add",
                 tint = Hex674b3f,
-                modifier = Modifier.size(39.dp)
-                    .clickable { navHostController.navigate(ScreenRoutes.AddAccountScreen.route)  }
+                modifier = Modifier
+                    .size(39.dp)
+                    .clickable {
+                        navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}")
+                    }
 
             )
 
@@ -158,39 +165,44 @@ fun TopAppBarAccountScreen(navHostController: NavHostController){
 }
 
 @Composable
-fun AccountItem(list:String) {
+fun AccountItem(addAccount: AddAccount, onClick: (AddAccount) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf6f3ea)
+            .clickable { onClick(addAccount) } // Handle click
     ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(15.dp)
-
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Add Icon",
-                    modifier = Modifier.size(24.dp),
-                    tint = Hex674b3f
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = list,
-                    color = Hex674b3f,
-                    style = TextStyle(fontSize = 16.sp)
-                )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)
+        ) {
+            val selectedColor = if (addAccount.color.isEmpty()) {
+                Color.Black
+            } else {
+                Color(android.graphics.Color.parseColor(addAccount.color))
             }
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Add Icon",
+                modifier = Modifier.size(24.dp),
+                tint = selectedColor
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = addAccount.accountName,
+                color = Hex674b3f,
+                style = TextStyle(fontSize = 16.sp)
+            )
+        }
         Spacer(
             modifier = Modifier
                 .height(1.dp)
                 .fillMaxWidth()
                 .background(Hexdedbd4)
         )
-
-
     }
 }
+

@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
+
+
 }
 
 android {
@@ -58,5 +62,25 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.material3)
+
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation ("androidx.room:room-runtime:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+
+
+    kapt ("androidx.room:room-compiler:2.6.1")
+
+    implementation ("com.google.dagger:hilt-android:2.51.1")
+
+    kapt ("com.google.dagger:hilt-android-compiler:2.51.1")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.7.6")
+    implementation ("com.google.code.gson:gson:2.11.0")
+
+
 }

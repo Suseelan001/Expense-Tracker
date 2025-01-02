@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.expensetracker.screens.AddExpenseAndIncome
 import com.example.expensetracker.screens.AccountScreen
@@ -15,6 +18,7 @@ import com.example.expensetracker.screens.AddAccountScreen
 import com.example.expensetracker.screens.CategoriesScreen
 import com.example.expensetracker.screens.HomeScreen
 import com.example.expensetracker.screens.NotificationScreen
+import com.example.expensetracker.viewModel.AddAccountViewModel
 
 @Composable
 fun BottomBarNavigation(
@@ -41,16 +45,32 @@ fun BottomBarNavigation(
                 CategoriesScreen(navHostController = navHostController)
             }
             composable(BottomBarRoutes.ACCOUNTS_SCREEN.routes) {
-                AccountScreen(navHostController = navHostController)
+                val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+
+                AccountScreen(navHostController = navHostController,addAccountViewModel)
             }
         }
 
-        composable(ScreenRoutes.Detail.route) {
+        composable(ScreenRoutes.AddTransactionScreen.route) {
             AddExpenseAndIncome(navHostController = navHostController)
         }
-        composable(ScreenRoutes.AddAccountScreen.route) {
-            AddAccountScreen(navHostController = navHostController)
+
+
+        composable(
+            route = "${ScreenRoutes.AddAccountScreen.route}/{accountId}",
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+            val userId = backStackEntry.arguments?.getString("accountId")?:"0"
+
+
+                AddAccountScreen(accountId = userId, navHostController = navHostController, addAccountViewModel)
+
+
+
         }
+
+
         composable(ScreenRoutes.CategoriesScreen.route) {
             CategoriesScreen(navHostController = navHostController)
         }

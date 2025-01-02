@@ -83,7 +83,7 @@ fun TopBar() {
             shape = RoundedCornerShape(4.dp),
 
             ) {
-            Text("December")
+            Text("January")
         }
 
 
@@ -247,7 +247,7 @@ fun BottomButtons(navHostController:NavHostController) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Button(
-            onClick = { navHostController.navigate(ScreenRoutes.Detail.route) },
+            onClick = { navHostController.navigate(ScreenRoutes.AddTransactionScreen.route) },
             colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = HexFFFFFFFF),
             border = BorderStroke(2.dp, HexFFFFFFFF),
             shape = RoundedCornerShape(4.dp),
@@ -257,7 +257,7 @@ fun BottomButtons(navHostController:NavHostController) {
         }
 
         Button(
-            onClick = { navHostController.navigate(ScreenRoutes.Detail.route) },
+            onClick = { navHostController.navigate(ScreenRoutes.AddTransactionScreen.route) },
             colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = HexFFFFFFFF),
             border = BorderStroke(2.dp, HexFFFFFFFF),
             shape = RoundedCornerShape(4.dp),

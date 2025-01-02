@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,12 +23,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.appstate.rememberAppState
 import com.example.expensetracker.bottombar.BottomBarRow
+import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.navigation.BottomBarNavigation
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexf1efe3
+import com.example.expensetracker.viewModel.AddAccountViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val addAccountViewModel: AddAccountViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,5 +68,19 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        observeAndInsertDefaultAccount()
     }
+
+private fun observeAndInsertDefaultAccount() {
+    addAccountViewModel.getAllRecord().observe(this) { accountList ->
+        if (accountList.isEmpty()) {
+            val defaultAccount = AddAccount(
+                id = 1,
+                accountName = "Personal",
+                color = "#000000"
+            )
+            addAccountViewModel.insertAccount(defaultAccount)
+        }
+    }
+}
 }

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.commonText.CommonText
+import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex164872
 import com.example.expensetracker.ui.theme.Hex3d3a35
 import com.example.expensetracker.ui.theme.Hex674b3f
@@ -69,7 +70,7 @@ Column( modifier = Modifier
     .background(Hexddd0bf)) {
 
     TopAppBarAddExpense(navHostController)
-    AddDetail()
+    AddDetail( navHostController)
 
 
     }
@@ -105,7 +106,7 @@ fun TopAppBarAddExpense(navHostController: NavHostController){
 }
 
 @Composable
-fun AddDetail() {
+fun AddDetail( navHostController: NavHostController) {
     val clickedButton = remember { mutableStateOf("expense") }
     var showDatePicker by remember { mutableStateOf(false) }
      val mContext= LocalContext.current
@@ -263,6 +264,8 @@ fun AddDetail() {
                 modifier = Modifier
                     .padding(5.dp)
                     .weight(0.70f)
+                    .clickable {
+                        navHostController.navigate(ScreenRoutes.CategoriesScreen.route)                     }
             )
         }
 
