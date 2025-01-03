@@ -5,7 +5,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,42 +23,42 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.expensetracker.model.AddAccount
+import com.example.expensetracker.model.AddCategory
 import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
-import com.example.expensetracker.ui.theme.Hex33cc4d
 import com.example.expensetracker.ui.theme.Hex674b3f
-import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexdedbd4
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
+import com.example.expensetracker.viewModel.AddCategoryViewModel
 
 
 @Composable
 fun CategoriesScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    addCategoryViewModel: AddCategoryViewModel
 ) {
+
+
     val clickedButton = remember { mutableStateOf("expense") }
 
+    val addCategoryViewModel by addCategoryViewModel.getAllRecord(clickedButton.value).observeAsState(emptyList())
 
     BackHandler {
         navHostController.navigate(BottomBarRoutes.SPENDING_SCREEN.routes){
@@ -73,7 +72,7 @@ fun CategoriesScreen(
         .fillMaxSize()
         .background(Hexddd0bf)) {
 
-        TopAppBarCategoriesScreen(navHostController)
+        TopAppBarCategoriesScreen(navHostController,clickedButton.value)
 
         Row(
             modifier = Modifier
@@ -118,21 +117,18 @@ fun CategoriesScreen(
                 Text("INCOME", letterSpacing = 2.sp)
             }
         }
-        val financialSummary = arrayListOf(
-          "Fuel","Kids","Movie"
-        )
 
-        LazyColumn(modifier = Modifier
-            .wrapContentWidth()
-            .padding( top = 16.dp)) {
-            financialSummary.forEach{ iteam->
-                item {
-                    CategoriesItem(iteam)
+        addCategoryViewModel.forEach{ item->
+            CategoriesItem(
+                item = item,
+                onClick = { selectedAccount ->
+                    navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}/${"Category"}/${""}")
+
                 }
-            }
-
-
+            )
         }
+
+
 
 
 
@@ -147,7 +143,7 @@ fun CategoriesScreen(
 }
 
 @Composable
-fun TopAppBarCategoriesScreen(navHostController: NavHostController){
+fun TopAppBarCategoriesScreen(navHostController: NavHostController,clickedButton:String){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,7 +166,9 @@ fun TopAppBarCategoriesScreen(navHostController: NavHostController){
                 contentDescription = "add",
                 tint = Hex674b3f,
                 modifier = Modifier.size(39.dp)
-                    .clickable { navHostController.navigate(ScreenRoutes.AddAccountScreen.route)  }
+                    .clickable {
+                        navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Category"}/${clickedButton}")
+                    }
 
             )
 
@@ -191,11 +189,12 @@ fun TopAppBarCategoriesScreen(navHostController: NavHostController){
 }
 
 @Composable
-fun CategoriesItem(list:String) {
+fun CategoriesItem(item: AddCategory, onClick: (AddCategory) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf6f3ea)
+            .clickable { onClick (item)}
     ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -212,7 +211,7 @@ fun CategoriesItem(list:String) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = list,
+                    text = item.category,
                     color = Hex674b3f,
                     style = TextStyle(fontSize = 16.sp)
                 )

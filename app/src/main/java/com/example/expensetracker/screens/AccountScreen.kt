@@ -95,7 +95,7 @@ fun AccountScreen(
                     AccountItem(
                         addAccount = item,
                         onClick = { selectedAccount ->
-                            navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}")
+                            navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}/${"Account"}/${""}")
 
                         }
                     )
@@ -143,7 +143,7 @@ fun TopAppBarAccountScreen(navHostController: NavHostController){
                 modifier = Modifier
                     .size(39.dp)
                     .clickable {
-                        navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}")
+                        navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Account"}/${""}")
                     }
 
             )

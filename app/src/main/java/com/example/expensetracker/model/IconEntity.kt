@@ -3,12 +3,13 @@ package com.example.expensetracker.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "add_account_dao")
-data class AddAccount(
+@Entity(tableName = "icon_table")
+data class IconEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val accountName: String,
-    val color:String ,
-    val primaryAccount:Boolean=false)
+    val category: String,
+    val iconName: String,
+    val iconResId: Int
+)
 
 

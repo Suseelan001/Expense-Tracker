@@ -22,12 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
+import com.example.expensetracker.model.AddAccount
+import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex33cc4d
@@ -46,11 +49,18 @@ import com.example.expensetracker.ui.theme.Hexdbeed8
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexeedad9
 import com.example.expensetracker.ui.theme.Hexf1efe3
+import com.example.expensetracker.viewModel.AddTransactionViewModel
+import com.google.gson.Gson
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
-fun NotificationScreen(
-    navHostController: NavHostController
+fun TransactionScreen(
+    navHostController: NavHostController,
+    addTransactionViewModel: AddTransactionViewModel
+
 ) {
     BackHandler {
         navHostController.navigate(BottomBarRoutes.SPENDING_SCREEN.routes){
@@ -60,6 +70,17 @@ fun NotificationScreen(
         }
     }
 
+    val transactionList by addTransactionViewModel.getAllRecord().observeAsState(emptyList())
+    val totalExpense = transactionList
+        .filter { it.type == "expense" }
+        .sumOf { it.amount.toDouble() }
+
+    val totalIncome = transactionList
+        .filter { it.type == "income" }
+        .sumOf { it.amount.toDouble() }
+
+
+    println("CHECK_TAG_transactionList " +Gson().toJson(transactionList) )
     Column( modifier = Modifier
         .fillMaxSize()
         .background(Hexddd0bf)) {
@@ -90,7 +111,7 @@ fun NotificationScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "$ 0.00",
+                    text = "$ $totalIncome",
                     color = Hex33cc4d,
                     textAlign = TextAlign.Center
                 )
@@ -111,7 +132,7 @@ fun NotificationScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "$ 0.00",
+                    text = "$ $totalExpense",
                     color = Hex9e3d46,
                     textAlign = TextAlign.Center
                 )
@@ -119,31 +140,32 @@ fun NotificationScreen(
         }
 
 
-        val financialSummary = arrayListOf(
-            "Fuel","Food","Drink"
-        )
 
-        LazyColumn(modifier = Modifier
-            .wrapContentWidth()) {
-            financialSummary.forEach{ item ->
-                item {
-                    ExpenseItem(item)
-                }
+
+
+            transactionList.forEach{ item ->
+                    TransactionItem(item,
+                    onClick = { selectedAccount ->
+                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${selectedAccount.id}")
+
+                          }
+                    )
             }
-        }
+
     }
 }
 
 @Composable
-fun ExpenseItem(item:String) {
+fun TransactionItem(item: TransactionModel, onClick: (TransactionModel) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFFDF5E6))
+            .clickable { onClick(item) }
     ) {
         Icon(
             painter = painterResource(id = R.drawable.person_icon),
-            contentDescription = item,
+            contentDescription = item.category,
             tint = Color.Black,
             modifier = Modifier
                 .size(40.dp)
@@ -154,25 +176,27 @@ fun ExpenseItem(item:String) {
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
                 .padding(bottom = 5.dp, top = 5.dp)
 
         ) {
             Text(
-                text = item,
+                text = item.category,
                 color = Color.Black,
             )
             Text(
-                text = "Thursday, 02 Jan 2025",
+                text =formatDate(item.date),
                 color = Color.Gray,
             )
         }
 
         Text(
-            text = "₹ 200.00",
-            color = Color(0xFFB22222),
+            text = "₹ " + item.amount,
+            color = if (item.type.equals("expense"))  Color(0xFFB22222) else  Hex33cc4d ,
             textAlign = TextAlign.End,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
                 .padding(end = 16.dp)
         )
     }
@@ -181,6 +205,14 @@ fun ExpenseItem(item:String) {
         .height(1.dp)
         .background(Hexc9c6c1))
 
+}
+
+fun formatDate(inputDate: String): String {
+    val inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH)
+    val outputFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy", Locale.ENGLISH)
+
+    val date = LocalDate.parse(inputDate, inputFormatter)
+    return date.format(outputFormatter)
 }
 
 @Composable
@@ -210,8 +242,10 @@ fun TopBarTransactionScreen(navHostController: NavHostController) {
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add",
                 tint = Hex674b3f,
-                modifier = Modifier.size(34.dp)
-                    .clickable { navHostController.navigate(ScreenRoutes.AddTransactionScreen.route)  }
+                modifier = Modifier
+                    .size(34.dp)
+                    .clickable {
+                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}")                     }
             )
 
             Spacer(modifier = Modifier.width(16.dp))

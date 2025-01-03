@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
+import com.example.expensetracker.model.AddCategory
 import com.example.expensetracker.ui.theme.Hex164872
 import com.example.expensetracker.ui.theme.Hex33cc4d
 import com.example.expensetracker.ui.theme.Hex3d3a35
@@ -63,12 +64,18 @@ import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddAccountViewModel
+import com.example.expensetracker.viewModel.AddCategoryViewModel
 import com.google.gson.Gson
 
 
 @Composable
-fun AddAccountScreen(accountId:String,
-    navHostController: NavHostController,addAccountViewModel:AddAccountViewModel
+fun AddAccountScreen(
+    screenType:String,
+    accountId:String,
+    transactionType:String,
+    navHostController: NavHostController,
+    addAccountViewModel:AddAccountViewModel,
+    addCategoryViewModel: AddCategoryViewModel
 ){
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("") }
@@ -90,7 +97,7 @@ fun AddAccountScreen(accountId:String,
         .fillMaxSize()
         .background(Hexddd0bf)) {
 
-        TopAppBarAddAccount(navHostController,name,selectedColor,addAccountViewModel,accountId.toInt())
+        TopAppBarAddAccount(transactionType,screenType,navHostController,name,selectedColor,addAccountViewModel,accountId.toInt(),addCategoryViewModel)
         Spacer(modifier = Modifier
             .padding(top = 16.dp))
 
@@ -100,7 +107,7 @@ fun AddAccountScreen(accountId:String,
                 .background(Hexd8d5cc)
         ) {
             Text(
-                "Account Detail",
+                "$screenType Detail",
                 modifier = Modifier.padding(start = 16.dp, top = 5.dp, bottom = 5.dp),
                 color = Hex6a6762
             )
@@ -260,9 +267,23 @@ fun AddAccountScreen(accountId:String,
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 16.dp),
                     onClick = {
-                        addAccountViewModel.deleteSingleRecord(accountId.toInt())
-                        Toast.makeText(context, "Your account has been deleted", Toast.LENGTH_SHORT).show()
-                        navHostController.popBackStack()
+                        if (screenType=="Category"){
+
+                            addCategoryViewModel.deleteSingleRecord(accountId.toInt())
+                            Toast.makeText(context, "Your Category  has been deleted", Toast.LENGTH_SHORT).show()
+                            navHostController.popBackStack()
+
+
+
+                        }else
+                        {
+                            if (screenType=="Account")
+
+                            addAccountViewModel.deleteSingleRecord(accountId.toInt())
+                            Toast.makeText(context, "Your account has been deleted", Toast.LENGTH_SHORT).show()
+                            navHostController.popBackStack()
+                        }
+
                     },
                     colors = ButtonDefaults.buttonColors(Hex9e3d46, contentColor = HexFFFFFFFF),
                     shape = RoundedCornerShape(4.dp)
@@ -280,7 +301,7 @@ fun AddAccountScreen(accountId:String,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBarAddAccount(navHostController: NavHostController,name:String,selectedColor:String,addAccountViewModel:AddAccountViewModel,accountId:Int){
+fun TopAppBarAddAccount(transactionType:String,screenType:String,navHostController: NavHostController,name:String,selectedColor:String,addAccountViewModel:AddAccountViewModel,accountId:Int,addCategoryViewModel:AddCategoryViewModel){
     val context = LocalContext.current
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -307,18 +328,38 @@ fun TopAppBarAddAccount(navHostController: NavHostController,name:String,selecte
                     Toast.makeText(context, "Please select name ", Toast.LENGTH_SHORT).show()
                 }else{
 
-                    val addAccount = AddAccount(accountName = name, color = selectedColor)
+                    if (screenType=="Account"){
+                        val addAccount = AddAccount(accountName = name, color = selectedColor)
 
-                    if (accountId > 0) {
-                        val updatedAccount = addAccount.copy(id = accountId)
-                        addAccountViewModel.updateRecord(updatedAccount)
-                        Toast.makeText(context, "Your account has been updated", Toast.LENGTH_SHORT).show()
-                    } else {
-                        addAccountViewModel.insertAccount(addAccount)
-                        Toast.makeText(context, "Your account has been created", Toast.LENGTH_SHORT).show()
+                        if (accountId > 0) {
+                            val updatedAccount = addAccount.copy(id = accountId)
+                            addAccountViewModel.updateRecord(updatedAccount)
+                            Toast.makeText(context, "Your account has been updated", Toast.LENGTH_SHORT).show()
+                        } else {
+                            addAccountViewModel.insertAccount(addAccount)
+                            Toast.makeText(context, "Your account has been created", Toast.LENGTH_SHORT).show()
+                        }
+
+                        navHostController.popBackStack()
+                    }else{
+                        if (screenType=="Category"){
+
+                            val addCategory = AddCategory(category = name, color = selectedColor,categoryType=transactionType)
+
+                            if (accountId > 0) {
+                                val updatedAccount = addCategory.copy(id = accountId)
+                                addCategoryViewModel.updateRecord(updatedAccount)
+                                Toast.makeText(context, "Your category has been updated", Toast.LENGTH_SHORT).show()
+                            } else {
+                                addCategoryViewModel.insertAccount(addCategory)
+                                Toast.makeText(context, "Your category has been created", Toast.LENGTH_SHORT).show()
+                            }
+
+                            navHostController.popBackStack()
+
+                        }
                     }
 
-                    navHostController.popBackStack()
 
 
 

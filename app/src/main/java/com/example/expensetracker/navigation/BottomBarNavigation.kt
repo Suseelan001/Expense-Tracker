@@ -17,9 +17,12 @@ import com.example.expensetracker.screens.AccountScreen
 import com.example.expensetracker.screens.AddAccountScreen
 import com.example.expensetracker.screens.CategoriesScreen
 import com.example.expensetracker.screens.HomeScreen
-import com.example.expensetracker.screens.NotificationScreen
+import com.example.expensetracker.screens.SelectCategoriesScreen
+import com.example.expensetracker.screens.TransactionScreen
 import com.example.expensetracker.viewModel.AddAccountViewModel
+import com.example.expensetracker.viewModel.AddCategoryViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
+import com.example.expensetracker.viewModel.MainViewModel
 
 @Composable
 fun BottomBarNavigation(
@@ -37,46 +40,67 @@ fun BottomBarNavigation(
             startDestination = BottomBarRoutes.SPENDING_SCREEN.routes
         ) {
             composable(BottomBarRoutes.SPENDING_SCREEN.routes) {
-                HomeScreen(navHostController = navHostController, context)
+                val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+                val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+
+                HomeScreen(navHostController = navHostController,addAccountViewModel,addTransactionViewModel)
             }
             composable(BottomBarRoutes.TRANSACTIONS_SCREEN.routes) {
-                NotificationScreen(navHostController = navHostController)
+                val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+                TransactionScreen(navHostController = navHostController,addTransactionViewModel)
             }
             composable(BottomBarRoutes.CATEGORIES_SCREEN.routes) {
-                CategoriesScreen(navHostController = navHostController)
+                val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
+
+                CategoriesScreen(navHostController = navHostController,addCategoryViewModel)
             }
             composable(BottomBarRoutes.ACCOUNTS_SCREEN.routes) {
                 val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
-
                 AccountScreen(navHostController = navHostController,addAccountViewModel)
             }
         }
 
-        composable(ScreenRoutes.AddTransactionScreen.route) {
-
-            val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
-
-            AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel)
-        }
 
 
         composable(
-            route = "${ScreenRoutes.AddAccountScreen.route}/{accountId}",
+            route = "${ScreenRoutes.AddTransactionScreen.route}/{accountId}",
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+            val mainViewModel = hiltViewModel<MainViewModel>()
+            val accountId = backStackEntry.arguments?.getString("accountId")?:"0"
+            AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel,mainViewModel,accountId)
+
+        }
+
+
+
+
+        composable(
+            route = "${ScreenRoutes.AddAccountScreen.route}/{accountId}/{screenType}/{transactionType}",
             arguments = listOf(navArgument("accountId") { type = NavType.StringType })
         ) { backStackEntry ->
             val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+            val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
             val userId = backStackEntry.arguments?.getString("accountId")?:"0"
-
-
-                AddAccountScreen(accountId = userId, navHostController = navHostController, addAccountViewModel)
-
-
+            val screenType = backStackEntry.arguments?.getString("screenType")?:""
+            val transactionType = backStackEntry.arguments?.getString("transactionType")?:""
+                AddAccountScreen(screenType,accountId = userId,transactionType, navHostController = navHostController, addAccountViewModel,addCategoryViewModel)
 
         }
 
 
-        composable(ScreenRoutes.CategoriesScreen.route) {
-            CategoriesScreen(navHostController = navHostController)
+
+        composable(
+            route = "${ScreenRoutes.SelectCategoriesScreen.route}/{transactionType}",
+            arguments = listOf(navArgument("transactionType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
+            val mainViewModel = hiltViewModel<MainViewModel>()
+            val transactionType = backStackEntry.arguments?.getString("transactionType")?:""
+            SelectCategoriesScreen(navHostController = navHostController,addCategoryViewModel,transactionType,mainViewModel)
+
         }
+
     }
 }

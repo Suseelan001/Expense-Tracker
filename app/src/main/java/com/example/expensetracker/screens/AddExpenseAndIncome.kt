@@ -1,5 +1,6 @@
 package com.example.expensetracker.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,12 +25,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,18 +45,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
-import com.example.expensetracker.commonText.CommonText
+import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex164872
 import com.example.expensetracker.ui.theme.Hex3d3a35
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.Hex6a6762
+import com.example.expensetracker.ui.theme.Hex9e3d46
+import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexc9c6c1
 import com.example.expensetracker.ui.theme.Hexd8d5cc
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddTransactionViewModel
+import com.example.expensetracker.viewModel.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -65,16 +69,45 @@ import java.util.Locale
 @Composable
 fun AddExpenseAndIncome(
     navHostController: NavHostController,
-    addTransactionViewModel:AddTransactionViewModel
+    addTransactionViewModel:AddTransactionViewModel,
+    mainViewModel: MainViewModel,
+    accountId:String
 ) {
-Column( modifier = Modifier
+    val context= LocalContext.current
+
+    Column( modifier = Modifier
     .fillMaxSize()
     .background(Hexddd0bf)) {
 
-    AddDetail( navHostController,addTransactionViewModel)
+    AddDetail( navHostController,addTransactionViewModel,mainViewModel,accountId)
+    Spacer(modifier = Modifier
+        .padding(top = 16.dp))
 
-
+    if (accountId.toInt()>0) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 16.dp),
+                onClick = {
+                    addTransactionViewModel.deleteSingleRecord(accountId.toInt())
+                    Toast.makeText(context, "Your account has been deleted", Toast.LENGTH_SHORT).show()
+                    navHostController.popBackStack()
+                },
+                colors = ButtonDefaults.buttonColors(Hex9e3d46, contentColor = HexFFFFFFFF),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text("Delete")
+            }
+        }
     }
+
+
+
+}
 
 
 }
@@ -83,13 +116,29 @@ Column( modifier = Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddTransactionViewModel) {
-    val clickedButton = remember { mutableStateOf("expense") }
+fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddTransactionViewModel,mainViewModel:MainViewModel,accountId:String) {
+    var clickedButton = remember { mutableStateOf("expense") }
     var showDatePicker by remember { mutableStateOf(false) }
      val mContext= LocalContext.current
     val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-    var selectedDatefortask by remember { mutableStateOf(currentDate) }
+    var selectedDate by remember { mutableStateOf(currentDate) }
     var amount by remember { mutableStateOf("") }
+    val taskLoaded = remember { mutableStateOf(false) }
+    var category by remember { mutableStateOf("") }
+
+
+    if (accountId.toInt()>0){
+        val getTransactionRecord by addTransactionViewModel.getSingleRecord(accountId.toInt()).observeAsState()
+        if (getTransactionRecord != null && !taskLoaded.value) {
+            selectedDate = getTransactionRecord?.date ?: ""
+            amount = getTransactionRecord?.amount ?: ""
+            category = getTransactionRecord?.category ?: ""
+            clickedButton.value = getTransactionRecord?.type ?: ""
+            taskLoaded.value = true
+        }
+    }
+
+
 
 
     TopAppBar(
@@ -109,7 +158,10 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
         },
         actions = {
             TextButton(onClick = {
-
+                val addTransactionModel = TransactionModel(date=selectedDate,category=clickedButton.value, amount = amount, account = "personal", type = clickedButton.value)
+                addTransactionViewModel.insertAccount(addTransactionModel)
+                Toast.makeText(mContext, "Your transaction has been added", Toast.LENGTH_SHORT).show()
+                navHostController.popBackStack()
             }) {
                 Text("Done", color = Hex674b3f)
             }
@@ -197,7 +249,7 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
             )
 
             Text(
-                text = selectedDatefortask,
+                text = selectedDate,
                 color = Hex3d3a35,
                 modifier = Modifier
                     .padding(5.dp)
@@ -218,7 +270,7 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
                 mContext,
                 { _, selectedYear, selectedMonth, selectedDayOfMonth ->
                     val formattedDate = String.format("%02d/%02d/%04d", selectedDayOfMonth, selectedMonth + 1, selectedYear)
-                    selectedDatefortask = formattedDate
+                    selectedDate = formattedDate
                     showDatePicker = false
                 },
                 year, month, dayOfMonth
@@ -261,15 +313,18 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
                     .background(Hexc9c6c1)
             )
 
-            Text(
-                text = "Not Selected",
-                color = Hex3d3a35,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .weight(0.70f)
-                    .clickable {
-                        navHostController.navigate(ScreenRoutes.CategoriesScreen.route)                     }
-            )
+            (if (category.isEmpty()) "Not Selected" else category).let {
+                Text(
+                    text = it,
+                    color = Hex3d3a35,
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .weight(0.70f)
+                        .clickable {
+                            navHostController.navigate("${ScreenRoutes.SelectCategoriesScreen.route}/${clickedButton.value}")
+                        }
+                )
+            }
         }
 
         Spacer(

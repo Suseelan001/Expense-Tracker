@@ -3,12 +3,12 @@ package com.example.expensetracker.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "add_account_dao")
-data class AddAccount(
+@Entity(tableName = "add_category_dao")
+data class AddCategory(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val accountName: String,
+    val category: String,
     val color:String ,
-    val primaryAccount:Boolean=false)
+    val categoryType:String)
 
 

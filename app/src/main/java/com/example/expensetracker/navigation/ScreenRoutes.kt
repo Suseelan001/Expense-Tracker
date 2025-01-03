@@ -6,6 +6,6 @@ sealed class ScreenRoutes(val route: String) {
     data object BottomBar : ScreenRoutes("BOTTOM_BAR")
     data object AddTransactionScreen : ScreenRoutes("ADD_TRANSACTION_SCREEN")
     data object AddAccountScreen : ScreenRoutes("ADD_ACCOUNT_SCREEN")
-    data object CategoriesScreen : ScreenRoutes("CATEGORIES_SCREEN")
+    data object SelectCategoriesScreen : ScreenRoutes("SELECT_CATEGORIES_SCREEN")
 
 }
