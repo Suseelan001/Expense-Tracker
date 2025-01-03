@@ -120,14 +120,14 @@ fun NotificationScreen(
 
 
         val financialSummary = arrayListOf(
-            "Personal","Company 1","Company 2"
+            "Fuel","Food","Drink"
         )
 
         LazyColumn(modifier = Modifier
             .wrapContentWidth()) {
-            financialSummary.forEach{ _ ->
+            financialSummary.forEach{ item ->
                 item {
-                    ExpenseItem()
+                    ExpenseItem(item)
                 }
             }
         }
@@ -135,15 +135,15 @@ fun NotificationScreen(
 }
 
 @Composable
-fun ExpenseItem() {
+fun ExpenseItem(item:String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFFDF5E6))
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.close),
-            contentDescription = "Fuel Icon",
+            painter = painterResource(id = R.drawable.person_icon),
+            contentDescription = item,
             tint = Color.Black,
             modifier = Modifier
                 .size(40.dp)
@@ -159,7 +159,7 @@ fun ExpenseItem() {
 
         ) {
             Text(
-                text = "Fuel",
+                text = item,
                 color = Color.Black,
             )
             Text(

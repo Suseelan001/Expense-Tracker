@@ -19,6 +19,7 @@ import com.example.expensetracker.screens.CategoriesScreen
 import com.example.expensetracker.screens.HomeScreen
 import com.example.expensetracker.screens.NotificationScreen
 import com.example.expensetracker.viewModel.AddAccountViewModel
+import com.example.expensetracker.viewModel.AddTransactionViewModel
 
 @Composable
 fun BottomBarNavigation(
@@ -52,7 +53,10 @@ fun BottomBarNavigation(
         }
 
         composable(ScreenRoutes.AddTransactionScreen.route) {
-            AddExpenseAndIncome(navHostController = navHostController)
+
+            val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+
+            AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel)
         }
 
 

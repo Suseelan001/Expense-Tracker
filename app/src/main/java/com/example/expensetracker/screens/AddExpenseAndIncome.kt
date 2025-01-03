@@ -55,6 +55,7 @@ import com.example.expensetracker.ui.theme.Hexd8d5cc
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
+import com.example.expensetracker.viewModel.AddTransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -63,14 +64,14 @@ import java.util.Locale
 
 @Composable
 fun AddExpenseAndIncome(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    addTransactionViewModel:AddTransactionViewModel
 ) {
 Column( modifier = Modifier
     .fillMaxSize()
     .background(Hexddd0bf)) {
 
-    TopAppBarAddExpense(navHostController)
-    AddDetail( navHostController)
+    AddDetail( navHostController,addTransactionViewModel)
 
 
     }
@@ -78,9 +79,19 @@ Column( modifier = Modifier
 
 }
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBarAddExpense(navHostController: NavHostController){
+fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddTransactionViewModel) {
+    val clickedButton = remember { mutableStateOf("expense") }
+    var showDatePicker by remember { mutableStateOf(false) }
+     val mContext= LocalContext.current
+    val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+    var selectedDatefortask by remember { mutableStateOf(currentDate) }
+    var amount by remember { mutableStateOf("") }
+
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Hexf1efe3,
@@ -97,22 +108,14 @@ fun TopAppBarAddExpense(navHostController: NavHostController){
                 )                }
         },
         actions = {
-            TextButton(onClick = { /* Handle done action */ }) {
+            TextButton(onClick = {
+
+            }) {
                 Text("Done", color = Hex674b3f)
             }
         },
     )
 
-}
-
-@Composable
-fun AddDetail( navHostController: NavHostController) {
-    val clickedButton = remember { mutableStateOf("expense") }
-    var showDatePicker by remember { mutableStateOf(false) }
-     val mContext= LocalContext.current
-    val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-    var selectedDatefortask by remember { mutableStateOf(currentDate) }
-    var amount by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier
