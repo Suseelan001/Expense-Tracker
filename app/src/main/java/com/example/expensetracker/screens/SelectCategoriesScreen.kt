@@ -65,6 +65,7 @@ fun SelectCategoriesScreen(
     mainViewModel: MainViewModel
 ) {
 
+    addCategoryViewModel.initializeDefaultCategories()
 
     val getCategoryList by addCategoryViewModel.getAllRecord(transactionType).observeAsState(emptyList())
 

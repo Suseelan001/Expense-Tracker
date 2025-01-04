@@ -256,6 +256,13 @@ fun SelectAccountItem(addAccount: AddAccount, onClick: (AddAccount) -> Unit, sel
 
 @Composable
 fun DashboardDetails( navHostController: NavHostController,transactionList:List<TransactionModel>) {
+    val incomeAmount = transactionList
+        .filter { it.type == "income" }
+        .sumOf { it.amount.toDouble() }
+
+    val expenseAmount = transactionList
+        .filter { it.type == "expense" }
+        .sumOf { it.amount.toDouble() }
     Column(
         modifier = Modifier
             .wrapContentWidth()
@@ -317,7 +324,7 @@ fun DashboardDetails( navHostController: NavHostController,transactionList:List<
             .wrapContentWidth()
             .padding(start = 32.dp, end = 32.dp, top = 16.dp)) {
             item {
-                FinancialItem(transactionList)
+                FinancialItem(incomeAmount,expenseAmount)
             }
 
         }
@@ -329,14 +336,8 @@ fun DashboardDetails( navHostController: NavHostController,transactionList:List<
 }
 
 @Composable
-fun FinancialItem(transactionList: List<TransactionModel>) {
-    val incomeAmount = transactionList
-        .filter { it.type == "income" }
-        .sumOf { it.amount.toDouble() }
+fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
 
-    val expenseAmount = transactionList
-        .filter { it.type == "expense" }
-        .sumOf { it.amount.toDouble() }
 
     val balanceAmount = incomeAmount - expenseAmount
 

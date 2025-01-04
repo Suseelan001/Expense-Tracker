@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -135,7 +137,14 @@ fun AddDetail( navHostController: NavHostController,
                mainViewModel:MainViewModel,
                accountId:String,type:String,
                getAccountList:List<AddAccount>,addAccountViewModel:AddAccountViewModel) {
+
+
     val clickedButton = remember { mutableStateOf(type) }
+
+
+
+
+
     var showDatePicker by remember { mutableStateOf(false) }
      val mContext= LocalContext.current
     val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
@@ -165,17 +174,21 @@ fun AddDetail( navHostController: NavHostController,
         val getTransactionRecord by addTransactionViewModel.getSingleRecord(accountId.toInt()).observeAsState()
         if (getTransactionRecord != null && !taskLoaded.value) {
             selectedDate = getTransactionRecord?.date ?: ""
-            amount = getTransactionRecord?.amount ?: "0.00"
+            if(mainViewModel.enteredAmount.isEmpty()){
+                amount = getTransactionRecord?.amount ?: "0.00"
+            }
             category = getTransactionRecord?.category ?: ""
             clickedButton.value = getTransactionRecord?.type ?: ""
             taskLoaded.value = true
         }
-    }else{
-       // clickedButton.value=type
     }
 
-
-
+    if(!mainViewModel.enteredAmount.isEmpty()){
+        amount = mainViewModel.enteredAmount
+    }
+    if (mainViewModel.selectedTransactionType.isNotEmpty()){
+        clickedButton.value=mainViewModel.selectedTransactionType
+    }
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -238,6 +251,7 @@ fun AddDetail( navHostController: NavHostController,
         Button(
             onClick = {
                 clickedButton.value = "expense"
+                mainViewModel.selectedTransactionType = "expense"
             },
             colors = ButtonDefaults.buttonColors(if (clickedButton.value == "expense") Hex674b3f else Color.Transparent,
                 contentColor = if (clickedButton.value == "expense") Color.White else Hex674b3f
@@ -256,6 +270,7 @@ fun AddDetail( navHostController: NavHostController,
         Button(
             onClick = {
                 clickedButton.value = "income"
+                mainViewModel.selectedTransactionType = "income"
             },
             colors = ButtonDefaults.buttonColors(if (clickedButton.value == "income") Hex674b3f else Color.Transparent,
                 contentColor = if (clickedButton.value == "income") Color.White else Hex674b3f
@@ -412,17 +427,20 @@ fun AddDetail( navHostController: NavHostController,
                     .width(1.dp)
                     .background(Hexc9c6c1)
             )
-
             BasicTextField(
                 modifier = Modifier
                     .weight(0.70f)
                     .padding(5.dp),
                 value = amount,
                 onValueChange = { newAmount ->
-                    amount = newAmount
+                    amount = newAmount.filter { it.isDigit()
+                    }
+                    mainViewModel.enteredAmount=newAmount
+
                 },
                 textStyle = TextStyle(color = Hex3d3a35),
                 singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
@@ -439,6 +457,7 @@ fun AddDetail( navHostController: NavHostController,
                     }
                 }
             )
+
         }
 
         Spacer(

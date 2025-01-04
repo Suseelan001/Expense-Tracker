@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -37,7 +35,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.model.AddCategory
 import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
@@ -57,8 +54,10 @@ fun CategoriesScreen(
 
 
     val clickedButton = remember { mutableStateOf("expense") }
+    addCategoryViewModel.initializeDefaultCategories()
 
-    val addCategoryViewModel by addCategoryViewModel.getAllRecord(clickedButton.value).observeAsState(emptyList())
+    val getCategoryList by addCategoryViewModel.getAllRecord(clickedButton.value).observeAsState(emptyList())
+
 
     BackHandler {
         navHostController.navigate(BottomBarRoutes.SPENDING_SCREEN.routes){
@@ -118,7 +117,7 @@ fun CategoriesScreen(
             }
         }
 
-        addCategoryViewModel.forEach{ item->
+        getCategoryList.forEach{ item->
             CategoriesItem(
                 item = item,
                 onClick = { selectedAccount ->

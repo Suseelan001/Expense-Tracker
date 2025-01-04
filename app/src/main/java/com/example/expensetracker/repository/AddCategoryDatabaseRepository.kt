@@ -55,5 +55,9 @@ class AddCategoryDatabaseRepository @Inject constructor(
         return taskDao.getAllRecord(categoryType)
     }
 
+    suspend fun getAllRecordNow(): List<AddCategory> {
+        return taskDao.getAllRecordsNow()
+    }
+
 
 }

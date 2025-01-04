@@ -27,8 +27,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,11 +47,13 @@ import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex33cc4d
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.Hex9e3d46
+import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexc9c6c1
 import com.example.expensetracker.ui.theme.Hexdbeed8
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexeedad9
 import com.example.expensetracker.ui.theme.Hexf1efe3
+import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.google.gson.Gson
 import java.time.LocalDate
@@ -59,7 +64,8 @@ import java.util.Locale
 @Composable
 fun TransactionScreen(
     navHostController: NavHostController,
-    addTransactionViewModel: AddTransactionViewModel
+    addTransactionViewModel: AddTransactionViewModel,
+    addAccountViewModel: AddAccountViewModel
 
 ) {
     BackHandler {
@@ -69,8 +75,20 @@ fun TransactionScreen(
             }
         }
     }
+    val accountType = remember { mutableStateOf("") }
 
-    val transactionList by addTransactionViewModel.getAllRecord().observeAsState(emptyList())
+    val getPrimaryAccount by addAccountViewModel.getPrimaryAccount().observeAsState()
+
+
+    LaunchedEffect(getPrimaryAccount) {
+        getPrimaryAccount?.let {
+            if (accountType.value != it.accountName) {
+                accountType.value = it.accountName
+            }
+        }
+    }
+    val transactionList by addTransactionViewModel.getRecordsbyType(accountType.value).observeAsState(emptyList())
+
     val totalExpense = transactionList
         .filter { it.type == "expense" }
         .sumOf { it.amount.toDouble() }
@@ -92,9 +110,10 @@ fun TransactionScreen(
             contentAlignment = Alignment.Center
         ) {
 
-                Text("Personal",
+                Text(accountType.value,
                     modifier = Modifier
-                    .padding(16.dp))
+                    .padding(16.dp),
+                    color= HexFFFFFFFF)
         }
 
 

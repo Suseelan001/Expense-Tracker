@@ -47,7 +47,8 @@ fun BottomBarNavigation(
             }
             composable(BottomBarRoutes.TRANSACTIONS_SCREEN.routes) {
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
-                TransactionScreen(navHostController = navHostController,addTransactionViewModel)
+                val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+                TransactionScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel)
             }
             composable(BottomBarRoutes.CATEGORIES_SCREEN.routes) {
                 val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()

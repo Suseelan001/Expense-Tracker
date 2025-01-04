@@ -13,6 +13,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor() : ViewModel() {
 
   var selectedCategory by mutableStateOf<String>("")
+  var selectedTransactionType by mutableStateOf<String>("")
+  var enteredAmount by mutableStateOf<String>("")
 
 
 }

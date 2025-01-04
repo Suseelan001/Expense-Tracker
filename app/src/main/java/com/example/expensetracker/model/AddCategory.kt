@@ -8,7 +8,7 @@ data class AddCategory(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val category: String,
-    val color:String ,
+    val color:String="" ,
     val categoryType:String)
 
 

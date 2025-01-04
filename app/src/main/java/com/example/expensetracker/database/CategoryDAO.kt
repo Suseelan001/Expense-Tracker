@@ -22,6 +22,11 @@ interface CategoryDAO {
     @Query("SELECT * FROM add_category_dao WHERE categoryType=:categoryType")
     fun getAllRecord(categoryType:String): LiveData<List<AddCategory>>
 
+
+    @Query("SELECT * FROM add_category_dao")
+    suspend fun getAllRecordsNow(): List<AddCategory>
+
+
     @Query("DELETE FROM add_category_dao")
     suspend fun clearUserDB()
 
