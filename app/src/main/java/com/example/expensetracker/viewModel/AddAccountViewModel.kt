@@ -23,6 +23,15 @@ class AddAccountViewModel @Inject constructor(
     fun getSingleRecord(id:Int): LiveData<AddAccount> {
         return addAccountDatabaseRepository.getSingleRecord(id)
     }
+    fun getPrimaryAccount(): LiveData<AddAccount> {
+        return addAccountDatabaseRepository.getPrimaryAccount()
+    }
+
+
+    fun updateAccountTypeRecord(id:Int,primaryAccount:Boolean) {
+        viewModelScope.launch {
+            addAccountDatabaseRepository.updateAccountTypeRecord(id,primaryAccount)        }
+    }
 
     fun updateRecord(addAccount: AddAccount) {
         viewModelScope.launch {

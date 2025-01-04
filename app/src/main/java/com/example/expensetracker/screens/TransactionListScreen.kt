@@ -146,7 +146,7 @@ fun TransactionScreen(
             transactionList.forEach{ item ->
                     TransactionItem(item,
                     onClick = { selectedAccount ->
-                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${selectedAccount.id}")
+                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${selectedAccount.id}/${""}")
 
                           }
                     )
@@ -245,7 +245,7 @@ fun TopBarTransactionScreen(navHostController: NavHostController) {
                 modifier = Modifier
                     .size(34.dp)
                     .clickable {
-                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}")                     }
+                        navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}/${"expense"}")                     }
             )
 
             Spacer(modifier = Modifier.width(16.dp))

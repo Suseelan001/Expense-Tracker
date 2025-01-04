@@ -8,7 +8,7 @@ import com.example.expensetracker.model.AddCategory
 import com.example.expensetracker.model.TransactionModel
 
 
-@Database(entities = [AddAccount::class, TransactionModel::class, AddCategory::class],   exportSchema = false,version = 5)
+@Database(entities = [AddAccount::class, TransactionModel::class, AddCategory::class],   exportSchema = false,version = 2)
 abstract class AppRoomDataBase: RoomDatabase() {
     abstract fun taskDAO(): AccountDAO
     abstract fun transactionDAO(): TransactionDAO

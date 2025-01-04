@@ -29,6 +29,7 @@ import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.viewModel.AddAccountViewModel
+import com.example.expensetracker.viewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -62,7 +63,7 @@ class MainActivity : ComponentActivity() {
                         BottomBarNavigation(
                             navHostController = appState.navHostController,
                             padding = innerPadding,
-                            this
+                            MainViewModel()
                         )
                     }
                 }
@@ -76,8 +77,9 @@ private fun observeAndInsertDefaultAccount() {
         if (accountList.isEmpty()) {
             val defaultAccount = AddAccount(
                 id = 1,
-                accountName = "Personal",
-                color = "#000000"
+                accountName = "personal",
+                color = "#000000",
+                primaryAccount=true
             )
             addAccountViewModel.insertAccount(defaultAccount)
         }

@@ -28,7 +28,7 @@ import com.example.expensetracker.viewModel.MainViewModel
 fun BottomBarNavigation(
     navHostController: NavHostController,
     padding: PaddingValues,
-    context: Activity
+    mainViewModel: MainViewModel
 ) {
     NavHost(
         navController = navHostController,
@@ -63,13 +63,14 @@ fun BottomBarNavigation(
 
 
         composable(
-            route = "${ScreenRoutes.AddTransactionScreen.route}/{accountId}",
+            route = "${ScreenRoutes.AddTransactionScreen.route}/{accountId}/{type}",
             arguments = listOf(navArgument("accountId") { type = NavType.StringType })
         ) { backStackEntry ->
             val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
-            val mainViewModel = hiltViewModel<MainViewModel>()
+            val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
             val accountId = backStackEntry.arguments?.getString("accountId")?:"0"
-            AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel,mainViewModel,accountId)
+            val type = backStackEntry.arguments?.getString("type")?:""
+            AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel,mainViewModel,accountId,type,addAccountViewModel)
 
         }
 
@@ -96,7 +97,6 @@ fun BottomBarNavigation(
             arguments = listOf(navArgument("transactionType") { type = NavType.StringType })
         ) { backStackEntry ->
             val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
-            val mainViewModel = hiltViewModel<MainViewModel>()
             val transactionType = backStackEntry.arguments?.getString("transactionType")?:""
             SelectCategoriesScreen(navHostController = navHostController,addCategoryViewModel,transactionType,mainViewModel)
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -65,9 +66,10 @@ fun SelectCategoriesScreen(
 ) {
 
 
-    val addCategoryViewModel by addCategoryViewModel.getAllRecord(transactionType).observeAsState(emptyList())
+    val getCategoryList by addCategoryViewModel.getAllRecord(transactionType).observeAsState(emptyList())
 
-
+   val emptyExpenseCategoryList = listOf("Fuel","Eating Out","School Fees")
+   val emptyIncomeCategoryList = listOf("Salary","Interest")
 
     Column( modifier = Modifier
         .fillMaxSize()
@@ -94,16 +96,41 @@ fun SelectCategoriesScreen(
             },
         )
 
-        addCategoryViewModel.forEach{ item->
-            SelectCategoriesItem(
-                item = item,
-                onClick = { categoryName ->
-                    println("CHECK_TAG___categoryName $categoryName")
-                    mainViewModel.updateSelectedItem(categoryName)
-                    navHostController.popBackStack()
+        if (getCategoryList.isNotEmpty()){
+            getCategoryList.forEach{ item->
+                SelectCategoriesItem(
+                    item = item.category,
+                    onClick = { categoryName ->
+                        mainViewModel.selectedCategory=categoryName
+                        navHostController.popBackStack()
+                    }
+                )
+            }
+        }else{
+
+            if (transactionType == "expense") {
+                emptyExpenseCategoryList.forEach { item ->
+                    SelectCategoriesItem(
+                        item = item,
+                        onClick = { categoryName ->
+                            mainViewModel.selectedCategory = categoryName
+                            navHostController.popBackStack()
+                        }
+                    )
                 }
-            )
+            }else{
+                emptyIncomeCategoryList.forEach { item ->
+                    SelectCategoriesItem(
+                        item = item,
+                        onClick = { categoryName ->
+                            mainViewModel.selectedCategory = categoryName
+                            navHostController.popBackStack()
+                        }
+                    )
+                }
+            }
         }
+
 
 
 
@@ -122,12 +149,12 @@ fun SelectCategoriesScreen(
 
 
 @Composable
-fun SelectCategoriesItem(item: AddCategory, onClick: (String) -> Unit) {
+fun SelectCategoriesItem(item: String, onClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf6f3ea)
-            .clickable { onClick(item.category) }
+            .clickable { onClick(item) }
     ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +172,7 @@ fun SelectCategoriesItem(item: AddCategory, onClick: (String) -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = item.category,
+                    text = item,
                     color = Hex674b3f,
                     style = TextStyle(fontSize = 16.sp)
                 )

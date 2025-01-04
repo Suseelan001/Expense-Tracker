@@ -31,6 +31,8 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +51,6 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
-import com.example.expensetracker.ui.theme.Hex3d3a35
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexe0e0e0
@@ -58,80 +59,93 @@ import com.example.expensetracker.ui.theme.HonchokomonoWithHexe0e0e018sp
 import com.example.expensetracker.ui.theme.HonchokomonoWithHexe0e0e020sp
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
+import com.google.gson.Gson
 
 
 @Composable
 fun HomeScreen(
     navHostController: NavHostController,
     addAccountViewModel: AddAccountViewModel,
-    addTransactionViewModel:AddTransactionViewModel
+    addTransactionViewModel: AddTransactionViewModel
 ) {
-
+    val getPrimaryAccount by addAccountViewModel.getPrimaryAccount().observeAsState()
+    val accountType = remember { mutableStateOf("") }
     val getAccountList by addAccountViewModel.getAllRecord().observeAsState(emptyList())
-    val transactionList by addTransactionViewModel.getAllRecord().observeAsState(emptyList())
 
 
-    Column (modifier = Modifier
-            .fillMaxWidth()) {
-        TopBar(getAccountList)
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        DashboardDetails(navHostController,transactionList)
-
-
+    LaunchedEffect(getPrimaryAccount) {
+        getPrimaryAccount?.let {
+            if (accountType.value != it.accountName) {
+                accountType.value = it.accountName
+            }
+        }
     }
 
+    val transactionList by addTransactionViewModel.getRecordsbyType(accountType.value).observeAsState(emptyList())
+
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TopBar(getAccountList, addAccountViewModel)
+        Spacer(modifier = Modifier.width(16.dp))
+        DashboardDetails(navHostController, transactionList)
+    }
 }
 
 
+
 @Composable
-fun TopBar(getAccountList:List<AddAccount>) {
+fun TopBar(getAccountList: List<AddAccount>, addAccountViewModel: AddAccountViewModel) {
     var showColorPicker by remember { mutableStateOf(false) }
+
+    val primaryAccount by remember(getAccountList) {
+        derivedStateOf {
+            getAccountList.firstOrNull { it.primaryAccount } ?: getAccountList.getOrNull(0)
+        }
+    }
+
+    println("CHECK_TAG_primaryAccount__  " + Gson().toJson(primaryAccount))
+    println("CHECK_TAG_PRIMARY_ACCOUNT_SIZE__  " + getAccountList.size)
 
     if (showColorPicker) {
         SelectAccountDialog(
+            addAccountViewModel = addAccountViewModel,
             getAccountList = getAccountList,
             onAccountSelected = { selectedAccount ->
+                addAccountViewModel.updateAccountTypeRecord(primaryAccount?.id ?: -1, false)
+                addAccountViewModel.updateAccountTypeRecord(selectedAccount.id, true)
                 showColorPicker = false
             },
-            onDismiss = {
-                showColorPicker = false
-            }
+            onDismiss = { showColorPicker = false }
         )
     }
-
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Hexf1efe3)
+            .background(Color(android.graphics.Color.parseColor("#f1efe3")))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
-            onClick = {  },
-            colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = Hex674b3f),
-            border = BorderStroke(2.dp, Hex674b3f),
-            shape = RoundedCornerShape(4.dp),
-
-            ) {
+            onClick = { /* Handle button click */ },
+            colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = Color(android.graphics.Color.parseColor("#674b3f"))),
+            border = BorderStroke(2.dp, Color(android.graphics.Color.parseColor("#674b3f"))),
+            shape = RoundedCornerShape(4.dp)
+        ) {
             Text("January")
         }
-
-
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = "Profile",
-                tint = Hex674b3f,
+                tint = Color(android.graphics.Color.parseColor(primaryAccount?.color ?: "#674b3f")),
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable {
-                        showColorPicker = true
-                    }
+                    .clickable { showColorPicker = true }
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -139,23 +153,25 @@ fun TopBar(getAccountList:List<AddAccount>) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",
-                tint = Hex674b3f,
+                tint = Color(android.graphics.Color.parseColor("#674b3f")),
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
-
         }
     }
 }
-
-
 @Composable
 fun SelectAccountDialog(
+    addAccountViewModel:AddAccountViewModel,
     getAccountList: List<AddAccount>,
     onAccountSelected: (AddAccount) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selectedAccount by remember { mutableStateOf<AddAccount?>(getAccountList.get(0)) }
+    var selectedAccount by remember {
+        mutableStateOf<AddAccount?>(
+            getAccountList.firstOrNull { it.primaryAccount }
+                ?: getAccountList.getOrNull(0)
+        )
+    }
 
     AlertDialog(
         containerColor = Color(0xFFFFFFFF),
@@ -172,6 +188,19 @@ fun SelectAccountDialog(
                             addAccount = item,
                             selectedAccount = selectedAccount,
                             onClick = { account ->
+
+                                selectedAccount?.let {
+                                    addAccountViewModel.updateAccountTypeRecord(
+                                        it.id,false)
+                                }
+                                account.let {
+                                    addAccountViewModel.updateAccountTypeRecord(
+                                        it.id,true)
+                                }
+                                println("CHECK_TAG_SELECTED_ACCOUNT_ " + Gson().toJson(selectedAccount) )
+
+                                println("CHECK_TAG_CLICKED_ACCOUNT_ " + Gson().toJson(account) )
+
                                 selectedAccount = account
                                 onAccountSelected(account)
                                 onDismiss()
@@ -400,7 +429,7 @@ fun BottomButtons(navHostController:NavHostController) {
     ) {
         Button(
             onClick = {
-                navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}") },
+                navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}/${"expense"}") },
             colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = HexFFFFFFFF),
             border = BorderStroke(2.dp, HexFFFFFFFF),
             shape = RoundedCornerShape(4.dp),
@@ -411,8 +440,7 @@ fun BottomButtons(navHostController:NavHostController) {
 
         Button(
             onClick = {
-                navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}")
-                      },
+                navHostController.navigate("${ScreenRoutes.AddTransactionScreen.route}/${"0"}/${"income"}") },
             colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = HexFFFFFFFF),
             border = BorderStroke(2.dp, HexFFFFFFFF),
             shape = RoundedCornerShape(4.dp),

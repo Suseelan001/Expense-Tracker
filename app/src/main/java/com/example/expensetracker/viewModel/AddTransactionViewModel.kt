@@ -45,6 +45,10 @@ class AddTransactionViewModel @Inject constructor(
         return addTransactionDatabaseRepository.getAllRecord()
     }
 
+    fun getRecordsbyType(account:String): LiveData<List<TransactionModel>> {
+        return addTransactionDatabaseRepository.getRecordsbyType(account)
+    }
+
     fun deleteSingleRecord(id:Int) {
         viewModelScope.launch {
             addTransactionDatabaseRepository.deleteSingleRecord(id)

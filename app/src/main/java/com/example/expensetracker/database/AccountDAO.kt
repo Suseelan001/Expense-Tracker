@@ -27,6 +27,12 @@ interface AccountDAO {
     @Query("SELECT * FROM add_account_dao WHERE id = :id")
     fun getSingleRecord(id: Int): LiveData<AddAccount>
 
+    @Query("SELECT * FROM add_account_dao WHERE primaryAccount = 1")
+    fun getPrimaryAccount(): LiveData<AddAccount>
+
+    @Query("UPDATE add_account_dao SET primaryAccount = :primaryAccountType WHERE id = :id")
+    suspend fun updateAccountTypeRecord(id: Int, primaryAccountType: Boolean)
+
     @Query("DELETE FROM add_account_dao WHERE id = :id")
     suspend fun deleteSingleRecord(id: Int)
 

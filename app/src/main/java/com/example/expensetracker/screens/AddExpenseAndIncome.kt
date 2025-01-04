@@ -16,18 +16,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
+import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex164872
@@ -58,8 +65,10 @@ import com.example.expensetracker.ui.theme.Hexd8d5cc
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
+import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.example.expensetracker.viewModel.MainViewModel
+import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -71,15 +80,20 @@ fun AddExpenseAndIncome(
     navHostController: NavHostController,
     addTransactionViewModel:AddTransactionViewModel,
     mainViewModel: MainViewModel,
-    accountId:String
+    accountId:String,
+    type:String,
+    addAccountViewModel: AddAccountViewModel
 ) {
     val context= LocalContext.current
 
-    Column( modifier = Modifier
-    .fillMaxSize()
-    .background(Hexddd0bf)) {
+    val getAccountList by addAccountViewModel.getAllRecord().observeAsState(emptyList())
 
-    AddDetail( navHostController,addTransactionViewModel,mainViewModel,accountId)
+
+    Column( modifier = Modifier
+        .fillMaxSize()
+        .background(Hexddd0bf)) {
+
+    AddDetail( navHostController,addTransactionViewModel,mainViewModel,accountId,type,getAccountList,addAccountViewModel)
     Spacer(modifier = Modifier
         .padding(top = 16.dp))
 
@@ -116,8 +130,12 @@ fun AddExpenseAndIncome(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddTransactionViewModel,mainViewModel:MainViewModel,accountId:String) {
-    var clickedButton = remember { mutableStateOf("expense") }
+fun AddDetail( navHostController: NavHostController,
+               addTransactionViewModel:AddTransactionViewModel,
+               mainViewModel:MainViewModel,
+               accountId:String,type:String,
+               getAccountList:List<AddAccount>,addAccountViewModel:AddAccountViewModel) {
+    val clickedButton = remember { mutableStateOf(type) }
     var showDatePicker by remember { mutableStateOf(false) }
      val mContext= LocalContext.current
     val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
@@ -125,17 +143,35 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
     var amount by remember { mutableStateOf("") }
     val taskLoaded = remember { mutableStateOf(false) }
     var category by remember { mutableStateOf("") }
+    var accountName by remember { mutableStateOf("") }
 
+    if (mainViewModel.selectedCategory!=""){
+        category=  mainViewModel.selectedCategory
+
+    }
+
+    var showColorPicker by remember { mutableStateOf(false) }
+    val getPrimaryAccount by addAccountViewModel.getPrimaryAccount().observeAsState()
+
+    LaunchedEffect(getPrimaryAccount) {
+        getPrimaryAccount?.let {
+            if (accountName != it.accountName) {
+                accountName = it.accountName
+            }
+        }
+    }
 
     if (accountId.toInt()>0){
         val getTransactionRecord by addTransactionViewModel.getSingleRecord(accountId.toInt()).observeAsState()
         if (getTransactionRecord != null && !taskLoaded.value) {
             selectedDate = getTransactionRecord?.date ?: ""
-            amount = getTransactionRecord?.amount ?: ""
+            amount = getTransactionRecord?.amount ?: "0.00"
             category = getTransactionRecord?.category ?: ""
             clickedButton.value = getTransactionRecord?.type ?: ""
             taskLoaded.value = true
         }
+    }else{
+       // clickedButton.value=type
     }
 
 
@@ -154,14 +190,37 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
                     contentDescription = "close",
                     tint = Hex674b3f,
                     modifier = Modifier.size(35.dp)
-                )                }
+                )
+            }
         },
         actions = {
             TextButton(onClick = {
-                val addTransactionModel = TransactionModel(date=selectedDate,category=clickedButton.value, amount = amount, account = "personal", type = clickedButton.value)
-                addTransactionViewModel.insertAccount(addTransactionModel)
-                Toast.makeText(mContext, "Your transaction has been added", Toast.LENGTH_SHORT).show()
-                navHostController.popBackStack()
+                if (amount.isEmpty()){
+                    Toast.makeText(mContext, "Enter amount", Toast.LENGTH_SHORT).show()
+                }else
+                    if (category.isEmpty()){
+                        Toast.makeText(mContext, "select category", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val addTransactionModel = TransactionModel(date=selectedDate,category=category, amount = amount, account = accountName, type = clickedButton.value)
+
+                        if (accountId.toInt()>0){
+                            val updatedTransaction = addTransactionModel.copy(id = accountId.toInt())
+                            addTransactionViewModel.updateRecord(updatedTransaction)
+                            Toast.makeText(mContext, "Your transaction has been updated", Toast.LENGTH_SHORT).show()
+                        }else{
+
+                            addTransactionViewModel.insertAccount(addTransactionModel)
+                            Toast.makeText(mContext, "Your transaction has been added", Toast.LENGTH_SHORT).show()
+                        }
+                        navHostController.popBackStack()
+
+
+                    }
+
+
+
+
+
             }) {
                 Text("Done", color = Hex674b3f)
             }
@@ -411,11 +470,14 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
             )
 
             Text(
-                text = "Personal",
+                text = accountName,
                 color = Hex3d3a35,
                 modifier = Modifier
                     .padding(5.dp)
                     .weight(0.70f)
+                    .clickable {
+                        showColorPicker = true
+                    }
             )
         }
 
@@ -425,12 +487,122 @@ fun AddDetail( navHostController: NavHostController,addTransactionViewModel:AddT
                 .background(Hexc9c6c1)
                 .fillMaxWidth()
         )
+
+
+
+
+        if (showColorPicker) {
+            SelectAccount(
+                addAccountViewModel = addAccountViewModel,
+                getAccountList = getAccountList,
+                onAccountSelected = { selectedAccount ->
+                    accountName=selectedAccount.accountName
+                    showColorPicker = false
+                },
+                onDismiss = { showColorPicker = false }
+            )
+        }
+
     }
 
 
 }
 
 
+@Composable
+fun SelectAccount(
+    addAccountViewModel:AddAccountViewModel,
+    getAccountList: List<AddAccount>,
+    onAccountSelected: (AddAccount) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selectedAccount by remember {
+        mutableStateOf<AddAccount?>(
+            getAccountList.firstOrNull { it.primaryAccount }
+                ?: getAccountList.getOrNull(0)
+        )
+    }
+
+    AlertDialog(
+        containerColor = Color(0xFFFFFFFF),
+        titleContentColor = Color(0xFF3D3A35),
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Select Account") },
+        text = {
+            if (getAccountList.isEmpty()) {
+                Text(text = "No accounts available.")
+            } else {
+                LazyColumn {
+                    items(getAccountList) { item ->
+                        SelectAccountItemForExpense(
+                            addAccount = item,
+                            selectedAccount = selectedAccount,
+                            onClick = { account ->
+
+                                selectedAccount?.let {
+                                    addAccountViewModel.updateAccountTypeRecord(
+                                        it.id,false)
+                                }
+                                account.let {
+                                    addAccountViewModel.updateAccountTypeRecord(
+                                        it.id,true)
+                                }
+                                println("CHECK_TAG_SELECTED_ACCOUNT_ " + Gson().toJson(selectedAccount) )
+
+                                println("CHECK_TAG_CLICKED_ACCOUNT_ " + Gson().toJson(account) )
+
+                                selectedAccount = account
+                                onAccountSelected(account)
+                                onDismiss()
+                            }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("CANCEL", color = Color(0xFF3D3A35))
+            }
+        }
+    )
+}
+
+
+@Composable
+fun SelectAccountItemForExpense(addAccount: AddAccount, onClick: (AddAccount) -> Unit, selectedAccount: AddAccount?) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)
+        ) {
+            val isSelected = addAccount == selectedAccount
+
+            RadioButton(
+                selected = isSelected,
+                onClick = { onClick(addAccount) },
+                modifier = Modifier.size(24.dp),
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color.Green,
+                    unselectedColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = addAccount.accountName,
+                color = Hex674b3f,
+                style = TextStyle(fontSize = 16.sp)
+            )
+        }
+    }
+}
 
 
 

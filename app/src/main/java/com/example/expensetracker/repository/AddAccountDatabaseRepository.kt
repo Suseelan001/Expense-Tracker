@@ -27,6 +27,17 @@ class AddAccountDatabaseRepository @Inject constructor(
         return taskDao.getSingleRecord(id)
     }
 
+    fun getPrimaryAccount(): LiveData<AddAccount> {
+        return taskDao.getPrimaryAccount()
+    }
+
+
+
+    suspend fun updateAccountTypeRecord(id: Int, primaryAccount:Boolean) {
+        withContext(Dispatchers.IO) {
+            taskDao.updateAccountTypeRecord(id,primaryAccount)
+        }
+    }
 
     suspend fun updateRecord(task: AddAccount) {
         withContext(Dispatchers.IO) {
