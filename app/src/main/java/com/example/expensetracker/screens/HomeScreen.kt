@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,17 +51,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
-import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexe0e0e0
-import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.HonchokomonoWithHexe0e0e018sp
 import com.example.expensetracker.ui.theme.HonchokomonoWithHexe0e0e020sp
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.google.gson.Gson
+import java.time.LocalDate
+import java.time.Year
 
 
 @Composable
@@ -71,7 +73,18 @@ fun HomeScreen(
     val getPrimaryAccount by addAccountViewModel.getPrimaryAccount().observeAsState()
     val accountType = remember { mutableStateOf("") }
     val getAccountList by addAccountViewModel.getAllRecord().observeAsState(emptyList())
+    var showColorPicker by remember { mutableStateOf(false) }
+    val months = listOf(
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    )
 
+    val currentMonthIndex = remember { mutableIntStateOf(LocalDate.now().monthValue - 1) }
+    val currentYear = remember { mutableIntStateOf(Year.now().value) }
+
+    val monthYear = remember(currentMonthIndex.intValue, currentYear.intValue) {
+        "${months[currentMonthIndex.intValue]} ${currentYear.intValue}"
+    }
 
     LaunchedEffect(getPrimaryAccount) {
         getPrimaryAccount?.let {
@@ -81,84 +94,185 @@ fun HomeScreen(
         }
     }
 
-    val transactionList by addTransactionViewModel.getRecordsbyType(accountType.value).observeAsState(emptyList())
+    val transactionList by addTransactionViewModel.getRecordsByTypeAndMonth(accountType.value,monthYear).observeAsState(emptyList())
 
 
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        TopBar(getAccountList, addAccountViewModel)
-        Spacer(modifier = Modifier.width(16.dp))
-        DashboardDetails(navHostController, transactionList)
-    }
-}
 
-
-
-@Composable
-fun TopBar(getAccountList: List<AddAccount>, addAccountViewModel: AddAccountViewModel) {
-    var showColorPicker by remember { mutableStateOf(false) }
-
-    val primaryAccount by remember(getAccountList) {
-        derivedStateOf {
-            getAccountList.firstOrNull { it.primaryAccount } ?: getAccountList.getOrNull(0)
+        val primaryAccount by remember(getAccountList) {
+            derivedStateOf {
+                getAccountList.firstOrNull { it.primaryAccount } ?: getAccountList.getOrNull(0)
+            }
         }
-    }
+        if (showColorPicker) {
+            SelectAccountDialog(
+                addAccountViewModel = addAccountViewModel,
+                getAccountList = getAccountList,
+                onAccountSelected = { selectedAccount ->
+                    addAccountViewModel.updateAccountTypeRecord(primaryAccount?.id ?: -1, false)
+                    addAccountViewModel.updateAccountTypeRecord(selectedAccount.id, true)
+                    showColorPicker = false
+                },
+                onDismiss = { showColorPicker = false }
+            )
+        }
 
-    println("CHECK_TAG_primaryAccount__  " + Gson().toJson(primaryAccount))
-    println("CHECK_TAG_PRIMARY_ACCOUNT_SIZE__  " + getAccountList.size)
-
-    if (showColorPicker) {
-        SelectAccountDialog(
-            addAccountViewModel = addAccountViewModel,
-            getAccountList = getAccountList,
-            onAccountSelected = { selectedAccount ->
-                addAccountViewModel.updateAccountTypeRecord(primaryAccount?.id ?: -1, false)
-                addAccountViewModel.updateAccountTypeRecord(selectedAccount.id, true)
-                showColorPicker = false
-            },
-            onDismiss = { showColorPicker = false }
-        )
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(android.graphics.Color.parseColor("#f1efe3")))
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Button(
-            onClick = { /* Handle button click */ },
-            colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = Color(android.graphics.Color.parseColor("#674b3f"))),
-            border = BorderStroke(2.dp, Color(android.graphics.Color.parseColor("#674b3f"))),
-            shape = RoundedCornerShape(4.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(android.graphics.Color.parseColor("#f1efe3")))
+                .padding(16.dp)
+            ,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("January")
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                tint = Color(android.graphics.Color.parseColor(primaryAccount?.color ?: "#674b3f")),
+            Button(
+                onClick = { /* Handle button click */ },
+                colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = Color(android.graphics.Color.parseColor("#674b3f"))),
+                border = BorderStroke(2.dp, Color(android.graphics.Color.parseColor("#674b3f"))),
+                shape = RoundedCornerShape(4.dp),
                 modifier = Modifier
-                    .size(24.dp)
-                    .clickable { showColorPicker = true }
-            )
+                    .width(120.dp)
+                    .wrapContentHeight()
+            ) {
+                Text(
+                    text = if (currentYear.intValue == Year.now().value) {
+                        months[currentMonthIndex.intValue]
+                    } else {
+                        "${(months[currentMonthIndex.intValue]).take(3)} ${currentYear.intValue}"
+                    },
+                )              }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    tint = primaryAccount?.color?.takeIf { it.isNotEmpty() && it.startsWith("#") && it.length == 7 }?.let {
+                        Color(android.graphics.Color.parseColor(it))
+                    } ?: Color(android.graphics.Color.parseColor("#674b3f")),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { showColorPicker = true }
+                )
+/*
+                Spacer(modifier = Modifier.width(16.dp))
+*/
 
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Menu",
-                tint = Color(android.graphics.Color.parseColor("#674b3f")),
-                modifier = Modifier.size(24.dp)
-            )
+           /*     Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Menu",
+                    tint = Color(android.graphics.Color.parseColor("#674b3f")),
+                    modifier = Modifier.size(24.dp)
+                )*/
+            }
         }
+        Spacer(modifier = Modifier.width(16.dp))
+
+
+        val incomeAmount = transactionList
+            .filter { it.type == "income" }
+            .sumOf { it.amount.toDouble() }
+
+        val expenseAmount = transactionList
+            .filter { it.type == "expense" }
+            .sumOf { it.amount.toDouble() }
+        Column(
+            modifier = Modifier
+                .wrapContentWidth()
+                .background(color = Color.Black)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_chevron_left_24),
+                    contentDescription = "chevron_left",
+                    tint = Hexe0e0e0,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(end = 5.dp)
+                        .clickable {
+                            if (currentMonthIndex.intValue == 0) {
+                                currentMonthIndex.intValue = months.size - 1
+                                currentYear.value -= 1
+                            } else {
+                                currentMonthIndex.value -= 1
+                            }
+                        }
+                )
+
+                Text(
+                    text = accountType.value,
+                    style = HonchokomonoWithHexe0e0e018sp
+                )
+
+                Icon(
+                    painter = painterResource(R.drawable.baseline_chevron_right_24),
+                    contentDescription = "chevron_right",
+                    tint = Hexe0e0e0,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(start = 5.dp)
+                        .clickable {
+                            if (currentMonthIndex.intValue == months.size - 1) {
+                                currentMonthIndex.intValue = 0
+                                currentYear.value += 1
+                            } else {
+                                currentMonthIndex.value += 1
+                            }
+                        }
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 32.dp, end = 32.dp)
+                    .height(10.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colorStops = arrayOf(
+                                0.0f to Color.Red,
+                                1.0f to Color.Green
+                            )
+                        ),
+                        shape =  RoundedCornerShape(4.dp)
+                    )
+
+            )
+
+
+
+
+
+
+
+            LazyColumn(modifier = Modifier
+                .wrapContentWidth()
+                .padding(start = 32.dp, end = 32.dp, top = 16.dp)) {
+                item {
+                    FinancialItem(incomeAmount,expenseAmount)
+                }
+
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+            BottomButtons(navHostController)
+
+        }
+
+
+
     }
 }
+
+
+
 @Composable
 fun SelectAccountDialog(
     addAccountViewModel:AddAccountViewModel,
@@ -167,7 +281,7 @@ fun SelectAccountDialog(
     onDismiss: () -> Unit
 ) {
     var selectedAccount by remember {
-        mutableStateOf<AddAccount?>(
+        mutableStateOf(
             getAccountList.firstOrNull { it.primaryAccount }
                 ?: getAccountList.getOrNull(0)
         )
@@ -254,86 +368,7 @@ fun SelectAccountItem(addAccount: AddAccount, onClick: (AddAccount) -> Unit, sel
     }
 }
 
-@Composable
-fun DashboardDetails( navHostController: NavHostController,transactionList:List<TransactionModel>) {
-    val incomeAmount = transactionList
-        .filter { it.type == "income" }
-        .sumOf { it.amount.toDouble() }
 
-    val expenseAmount = transactionList
-        .filter { it.type == "expense" }
-        .sumOf { it.amount.toDouble() }
-    Column(
-        modifier = Modifier
-            .wrapContentWidth()
-            .background(color = Color.Black)
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.baseline_chevron_left_24),
-                contentDescription = "chevron_left",
-                tint = Hexe0e0e0,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(end = 5.dp)
-            )
-
-            Text(
-                text = "Personal",
-                style = HonchokomonoWithHexe0e0e018sp
-            )
-
-            Icon(
-                painter = painterResource(R.drawable.baseline_chevron_right_24),
-                contentDescription = "chevron_right",
-                tint = Hexe0e0e0,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(start = 5.dp)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 32.dp, end = 32.dp)
-                .height(10.dp)
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Red,
-                            Color.Blue
-                        ),
-                        startX = 0f,
-                        endX = 1000f
-                    ),
-                    shape = RoundedCornerShape(4.dp)
-                )
-        )
-
-
-
-
-
-        LazyColumn(modifier = Modifier
-            .wrapContentWidth()
-            .padding(start = 32.dp, end = 32.dp, top = 16.dp)) {
-            item {
-                FinancialItem(incomeAmount,expenseAmount)
-            }
-
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-        BottomButtons(navHostController)
-
-    }
-}
 
 @Composable
 fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
@@ -355,7 +390,7 @@ fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
                 style = HonchokomonoWithHexe0e0e020sp
             )
             Text(
-                text = "$${"%.2f".format(incomeAmount)}",
+                text = "₹${"%.2f".format(incomeAmount)}",
                 style = HonchokomonoWithHexe0e0e020sp
             )
         }
@@ -372,7 +407,7 @@ fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
                 style = HonchokomonoWithHexe0e0e020sp
             )
             Text(
-                text = "$${"%.2f".format(expenseAmount)}",
+                text = "₹${"%.2f".format(expenseAmount)}",
                 style = HonchokomonoWithHexe0e0e020sp
             )
         }
@@ -381,6 +416,7 @@ fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 5.dp, bottom = 5.dp)
                 .height(1.dp)
         ) {
             val dotSize = 4.dp.toPx()
@@ -408,7 +444,7 @@ fun FinancialItem(incomeAmount: Double,expenseAmount:Double) {
                 style = HonchokomonoWithHexe0e0e020sp
             )
             Text(
-                text = "$${"%.2f".format(balanceAmount)}",
+                text = "₹${"%.2f".format(balanceAmount)}",
                 style = HonchokomonoWithHexe0e0e020sp
             )
         }

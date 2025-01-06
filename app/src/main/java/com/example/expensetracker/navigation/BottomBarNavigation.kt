@@ -1,6 +1,5 @@
 package com.example.expensetracker.navigation
 
-import android.app.Activity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable

@@ -44,6 +44,7 @@ import com.example.expensetracker.ui.theme.Hexdedbd4
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddCategoryViewModel
+import com.google.gson.Gson
 
 
 @Composable
@@ -51,12 +52,14 @@ fun CategoriesScreen(
     navHostController: NavHostController,
     addCategoryViewModel: AddCategoryViewModel
 ) {
-
-
     val clickedButton = remember { mutableStateOf("expense") }
     addCategoryViewModel.initializeDefaultCategories()
-
     val getCategoryList by addCategoryViewModel.getAllRecord(clickedButton.value).observeAsState(emptyList())
+
+    val getCategoryAllList by addCategoryViewModel.getAll().observeAsState(emptyList())
+
+
+    println("CHECK_TAG_CATEGORY_LIST  " + Gson().toJson(getCategoryAllList))
 
 
     BackHandler {
@@ -121,24 +124,12 @@ fun CategoriesScreen(
             CategoriesItem(
                 item = item,
                 onClick = { selectedAccount ->
-                    navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}/${"Category"}/${""}")
+                    navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${selectedAccount.id}/${"Category"}/${item.categoryType}")
 
                 }
             )
         }
-
-
-
-
-
     }
-
-
-
-
-
-
-
 }
 
 @Composable
@@ -147,7 +138,7 @@ fun TopAppBarCategoriesScreen(navHostController: NavHostController,clickedButton
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf1efe3)
-            ,
+            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -173,13 +164,13 @@ fun TopAppBarCategoriesScreen(navHostController: NavHostController,clickedButton
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Icon(
+/*            Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",
                 tint = Hex674b3f,
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))*/
 
         }
     }

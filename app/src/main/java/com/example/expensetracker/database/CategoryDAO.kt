@@ -23,6 +23,11 @@ interface CategoryDAO {
     fun getAllRecord(categoryType:String): LiveData<List<AddCategory>>
 
 
+
+    @Query("SELECT * FROM add_category_dao ")
+    fun getAll(): LiveData<List<AddCategory>>
+
+
     @Query("SELECT * FROM add_category_dao")
     suspend fun getAllRecordsNow(): List<AddCategory>
 

@@ -69,8 +69,7 @@ fun SelectCategoriesScreen(
 
     val getCategoryList by addCategoryViewModel.getAllRecord(transactionType).observeAsState(emptyList())
 
-   val emptyExpenseCategoryList = listOf("Fuel","Eating Out","School Fees")
-   val emptyIncomeCategoryList = listOf("Salary","Interest")
+
 
     Column( modifier = Modifier
         .fillMaxSize()
@@ -97,7 +96,6 @@ fun SelectCategoriesScreen(
             },
         )
 
-        if (getCategoryList.isNotEmpty()){
             getCategoryList.forEach{ item->
                 SelectCategoriesItem(
                     item = item.category,
@@ -107,34 +105,6 @@ fun SelectCategoriesScreen(
                     }
                 )
             }
-        }else{
-
-            if (transactionType == "expense") {
-                emptyExpenseCategoryList.forEach { item ->
-                    SelectCategoriesItem(
-                        item = item,
-                        onClick = { categoryName ->
-                            mainViewModel.selectedCategory = categoryName
-                            navHostController.popBackStack()
-                        }
-                    )
-                }
-            }else{
-                emptyIncomeCategoryList.forEach { item ->
-                    SelectCategoriesItem(
-                        item = item,
-                        onClick = { categoryName ->
-                            mainViewModel.selectedCategory = categoryName
-                            navHostController.popBackStack()
-                        }
-                    )
-                }
-            }
-        }
-
-
-
-
 
 
     }

@@ -35,7 +35,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +71,8 @@ import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.example.expensetracker.viewModel.MainViewModel
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -130,6 +131,11 @@ fun AddExpenseAndIncome(
 
 
 
+
+
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDetail( navHostController: NavHostController,
@@ -183,7 +189,7 @@ fun AddDetail( navHostController: NavHostController,
         }
     }
 
-    if(!mainViewModel.enteredAmount.isEmpty()){
+    if(mainViewModel.enteredAmount.isNotEmpty()){
         amount = mainViewModel.enteredAmount
     }
     if (mainViewModel.selectedTransactionType.isNotEmpty()){
@@ -213,8 +219,14 @@ fun AddDetail( navHostController: NavHostController,
                 }else
                     if (category.isEmpty()){
                         Toast.makeText(mContext, "select category", Toast.LENGTH_SHORT).show()
+                    }else
+                    if (!isAmountInt(amount)){
+                        Toast.makeText(mContext, "Please enter amount in number", Toast.LENGTH_SHORT).show()
                     } else {
-                        val addTransactionModel = TransactionModel(date=selectedDate,category=category, amount = amount, account = accountName, type = clickedButton.value)
+                        val addTransactionModel = TransactionModel(date=selectedDate,category=category,
+                            amount = amount, account = accountName,
+                            type = clickedButton.value,
+                            createdAt = formatToMonthYear(selectedDate))
 
                         if (accountId.toInt()>0){
                             val updatedTransaction = addTransactionModel.copy(id = accountId.toInt())
@@ -226,21 +238,13 @@ fun AddDetail( navHostController: NavHostController,
                             Toast.makeText(mContext, "Your transaction has been added", Toast.LENGTH_SHORT).show()
                         }
                         navHostController.popBackStack()
-
-
                     }
-
-
-
-
 
             }) {
                 Text("Done", color = Hex674b3f)
             }
         },
     )
-
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -358,7 +362,6 @@ fun AddDetail( navHostController: NavHostController,
             datePickerDialog.show()
         }
 
-
         Spacer(
             modifier = Modifier
                 .height(1.dp)
@@ -387,18 +390,16 @@ fun AddDetail( navHostController: NavHostController,
                     .background(Hexc9c6c1)
             )
 
-            (if (category.isEmpty()) "Not Selected" else category).let {
-                Text(
-                    text = it,
-                    color = Hex3d3a35,
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .weight(0.70f)
-                        .clickable {
-                            navHostController.navigate("${ScreenRoutes.SelectCategoriesScreen.route}/${clickedButton.value}")
-                        }
-                )
-            }
+            Text(
+                text = (category.ifEmpty { "Not Selected" }),
+                color = Hex3d3a35,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(0.70f)
+                    .clickable {
+                        navHostController.navigate("${ScreenRoutes.SelectCategoriesScreen.route}/${clickedButton.value}")
+                    }
+            )
         }
 
         Spacer(
@@ -440,7 +441,8 @@ fun AddDetail( navHostController: NavHostController,
                 },
                 textStyle = TextStyle(color = Hex3d3a35),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                keyboardOptions =
+                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
@@ -528,6 +530,17 @@ fun AddDetail( navHostController: NavHostController,
 }
 
 
+fun formatToMonthYear(dateString: String): String {
+    val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val date = LocalDate.parse(dateString, dateFormat)
+    val month = date.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
+    val year = date.year
+    return "$month $year"
+}
+
+fun isAmountInt(amount: String): Boolean {
+    return amount.toIntOrNull() != null
+}
 @Composable
 fun SelectAccount(
     addAccountViewModel:AddAccountViewModel,
@@ -536,7 +549,7 @@ fun SelectAccount(
     onDismiss: () -> Unit
 ) {
     var selectedAccount by remember {
-        mutableStateOf<AddAccount?>(
+        mutableStateOf(
             getAccountList.firstOrNull { it.primaryAccount }
                 ?: getAccountList.getOrNull(0)
         )

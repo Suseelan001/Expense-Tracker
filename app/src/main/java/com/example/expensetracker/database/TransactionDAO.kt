@@ -22,7 +22,11 @@ interface TransactionDAO {
     fun getAllRecord(): LiveData<List<TransactionModel>>
 
     @Query("SELECT * FROM add_transaction_dao  WHERE account = :account")
-    fun getRecordsbyType(account:String): LiveData<List<TransactionModel>>
+    fun getRecordsByType(account:String): LiveData<List<TransactionModel>>
+
+
+    @Query("SELECT * FROM add_transaction_dao  WHERE account = :account and createdAt = :monthYear ")
+    fun getRecordsByTypeAndMonth(account:String,monthYear:String): LiveData<List<TransactionModel>>
 
     @Query("DELETE FROM add_transaction_dao")
     suspend fun clearUserDB()

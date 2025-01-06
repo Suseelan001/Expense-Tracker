@@ -52,7 +52,6 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
 import com.example.expensetracker.model.AddCategory
 import com.example.expensetracker.ui.theme.Hex164872
-import com.example.expensetracker.ui.theme.Hex33cc4d
 import com.example.expensetracker.ui.theme.Hex3d3a35
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.Hex6a6762
@@ -65,7 +64,6 @@ import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddCategoryViewModel
-import com.google.gson.Gson
 
 
 @Composable
@@ -81,15 +79,26 @@ fun AddAccountScreen(
     var selectedColor by remember { mutableStateOf("") }
     val taskLoaded = remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
+    var primaryAccount by remember { mutableStateOf(false) }
     val context= LocalContext.current
 
+    if (screenType=="Category"){
+        val getCategoryRecord by addCategoryViewModel.getSingleRecord(accountId.toInt()).observeAsState()
+        if (getCategoryRecord != null && !taskLoaded.value) {
+            name = getCategoryRecord?.category ?: ""
+            selectedColor = getCategoryRecord?.color ?: ""
+            taskLoaded.value = true
+        }
+    }else{
         val getAccountRecord by addAccountViewModel.getSingleRecord(accountId.toInt()).observeAsState()
-
         if (getAccountRecord != null && !taskLoaded.value) {
             name = getAccountRecord?.accountName ?: ""
             selectedColor = getAccountRecord?.color ?: ""
+            primaryAccount=getAccountRecord?.primaryAccount?:false
             taskLoaded.value = true
         }
+    }
+
 
 
 
@@ -97,7 +106,7 @@ fun AddAccountScreen(
         .fillMaxSize()
         .background(Hexddd0bf)) {
 
-        TopAppBarAddAccount(transactionType,screenType,navHostController,name,selectedColor,addAccountViewModel,accountId.toInt(),addCategoryViewModel)
+        TopAppBarAddAccount(transactionType,screenType,navHostController,name,selectedColor,addAccountViewModel,accountId.toInt(),addCategoryViewModel,primaryAccount)
         Spacer(modifier = Modifier
             .padding(top = 16.dp))
 
@@ -257,40 +266,44 @@ fun AddAccountScreen(
         Spacer(modifier = Modifier
             .padding(top = 16.dp))
 
+        println("CHECK_TAG_PRIMARY_ACCOUNT___ $primaryAccount")
         if (accountId.toInt()>0) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Button(
+            if (!primaryAccount){
+
+                Box(
                     modifier = Modifier
-                        .padding(top = 16.dp, bottom = 16.dp),
-                    onClick = {
-                        if (screenType=="Category"){
-
-                            addCategoryViewModel.deleteSingleRecord(accountId.toInt())
-                            Toast.makeText(context, "Your Category  has been deleted", Toast.LENGTH_SHORT).show()
-                            navHostController.popBackStack()
-
-
-
-                        }else
-                        {
-                            if (screenType=="Account")
-
-                            addAccountViewModel.deleteSingleRecord(accountId.toInt())
-                            Toast.makeText(context, "Your account has been deleted", Toast.LENGTH_SHORT).show()
-                            navHostController.popBackStack()
-                        }
-
-                    },
-                    colors = ButtonDefaults.buttonColors(Hex9e3d46, contentColor = HexFFFFFFFF),
-                    shape = RoundedCornerShape(4.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Delete")
+                    Button(
+                        modifier = Modifier
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        onClick = {
+                            if (screenType=="Category"){
+
+                                addCategoryViewModel.deleteSingleRecord(accountId.toInt())
+                                Toast.makeText(context, "Your Category  has been deleted", Toast.LENGTH_SHORT).show()
+                                navHostController.popBackStack()
+
+
+
+                            }else {
+                                if (screenType=="Account")
+
+                                    addAccountViewModel.deleteSingleRecord(accountId.toInt())
+                                Toast.makeText(context, "Your account has been deleted", Toast.LENGTH_SHORT).show()
+                                navHostController.popBackStack()
+                            }
+
+                        },
+                        colors = ButtonDefaults.buttonColors(Hex9e3d46, contentColor = HexFFFFFFFF),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text("Delete")
+                    }
                 }
             }
+
         }
 
 
@@ -301,7 +314,12 @@ fun AddAccountScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBarAddAccount(transactionType:String,screenType:String,navHostController: NavHostController,name:String,selectedColor:String,addAccountViewModel:AddAccountViewModel,accountId:Int,addCategoryViewModel:AddCategoryViewModel){
+fun TopAppBarAddAccount(transactionType:String
+                        ,screenType:String,
+                        navHostController: NavHostController,
+                        name:String,selectedColor:String,addAccountViewModel:AddAccountViewModel,
+                        accountId:Int,addCategoryViewModel:AddCategoryViewModel,
+                        primaryAccount:Boolean){
     val context = LocalContext.current
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -329,7 +347,7 @@ fun TopAppBarAddAccount(transactionType:String,screenType:String,navHostControll
                 }else{
 
                     if (screenType=="Account"){
-                        val addAccount = AddAccount(accountName = name, color = selectedColor)
+                        val addAccount = AddAccount(accountName = name, color = selectedColor,primaryAccount=primaryAccount)
 
                         if (accountId > 0) {
                             val updatedAccount = addAccount.copy(id = accountId)
@@ -359,10 +377,6 @@ fun TopAppBarAddAccount(transactionType:String,screenType:String,navHostControll
 
                         }
                     }
-
-
-
-
                 }
             }) {
                 Text("Done", color = Hex674b3f)
@@ -375,10 +389,7 @@ fun TopAppBarAddAccount(transactionType:String,screenType:String,navHostControll
 
 @Composable
 fun ColorPickerDialog(onColorSelected: (String) -> Unit, onDismiss: () -> Unit) {
-    val colors = listOf(
-        "#FF0000", "#FF00FF", "#0000FF", "#00FFFF",
-        "#008000", "#FFFF00", "#808080", "#D3D3D3"
-    )
+    val colors = listOf("#FF0000", "#FF00FF", "#0000FF","#008000", "#FFFF00", "#808080", "#D3D3D3")
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -394,7 +405,10 @@ fun ColorPickerDialog(onColorSelected: (String) -> Unit, onDismiss: () -> Unit) 
                                 .padding(4.dp)
                                 .fillMaxSize()
                                 .aspectRatio(1f)
-                                .background(Color(android.graphics.Color.parseColor(hexColor)), shape = CircleShape)
+                                .background(
+                                    Color(android.graphics.Color.parseColor(hexColor)),
+                                    shape = CircleShape
+                                )
                                 .clickable { onColorSelected(hexColor) }
                         )
 

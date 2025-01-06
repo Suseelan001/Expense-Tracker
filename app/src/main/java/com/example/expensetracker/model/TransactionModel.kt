@@ -11,6 +11,7 @@ data class TransactionModel(
     val category:String,
     val amount : String,
     val account:String,
-    val type:String)
+    val type:String,
+    val createdAt:String)
 
 

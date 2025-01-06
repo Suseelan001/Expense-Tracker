@@ -44,6 +44,12 @@ class AddCategoryViewModel @Inject constructor(
     }
 
 
+    fun getAll(): LiveData<List<AddCategory>> {
+        return addCategoryDatabaseRepository.getAll()
+    }
+
+
+
 
     fun deleteSingleRecord(id:Int) {
         viewModelScope.launch {

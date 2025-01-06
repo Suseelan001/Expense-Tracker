@@ -73,21 +73,6 @@ fun AccountScreen(
 
         TopAppBarAccountScreen(navHostController)
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Button(
-                modifier = Modifier
-                    .padding(top = 16.dp, bottom = 16.dp),
-                onClick = { },
-                colors = ButtonDefaults.buttonColors(Hex33cc4d, contentColor = HexFFFFFFFF),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Text("Transfer")
-            }
-        }
 
 
 
@@ -123,7 +108,8 @@ fun TopAppBarAccountScreen(navHostController: NavHostController){
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Hexf1efe3),
+            .background(Hexf1efe3)
+            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -150,13 +136,13 @@ fun TopAppBarAccountScreen(navHostController: NavHostController){
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Icon(
+/*            Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",
                 tint = Hex674b3f,
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))*/
 
         }
     }

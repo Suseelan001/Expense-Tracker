@@ -53,8 +53,12 @@ class AddTransactionDatabaseRepository @Inject constructor(
         return taskDao.getAllRecord()
     }
 
-    fun getRecordsbyType(account:String): LiveData<List<TransactionModel>> {
-        return taskDao.getRecordsbyType(account)
+    fun getRecordsByType(account:String): LiveData<List<TransactionModel>> {
+        return taskDao.getRecordsByType(account)
+    }
+
+    fun getRecordsByTypeAndMonth(account:String,monthYear:String): LiveData<List<TransactionModel>> {
+        return taskDao.getRecordsByTypeAndMonth(account,monthYear)
     }
 
 
