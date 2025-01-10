@@ -16,8 +16,10 @@ import com.example.expensetracker.screens.AccountScreen
 import com.example.expensetracker.screens.AddAccountScreen
 import com.example.expensetracker.screens.CategoriesScreen
 import com.example.expensetracker.screens.HomeScreen
+import com.example.expensetracker.screens.PieChartScreen
 import com.example.expensetracker.screens.SelectCategoriesScreen
 import com.example.expensetracker.screens.TransactionScreen
+import com.example.expensetracker.screens.TransferScreen
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddCategoryViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
@@ -47,7 +49,8 @@ fun BottomBarNavigation(
             composable(BottomBarRoutes.TRANSACTIONS_SCREEN.routes) {
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
                 val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
-                TransactionScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel)
+                val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
+                TransactionScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel,addCategoryViewModel)
             }
             composable(BottomBarRoutes.CATEGORIES_SCREEN.routes) {
                 val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
@@ -71,6 +74,14 @@ fun BottomBarNavigation(
             val accountId = backStackEntry.arguments?.getString("accountId")?:"0"
             val type = backStackEntry.arguments?.getString("type")?:""
             AddExpenseAndIncome(navHostController = navHostController,addTransactionViewModel,mainViewModel,accountId,type,addAccountViewModel)
+
+        }
+
+        composable(
+            route = ScreenRoutes.TransferScreen.route) {
+            val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+            val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+            TransferScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel)
 
         }
 
@@ -99,6 +110,16 @@ fun BottomBarNavigation(
             val addCategoryViewModel = hiltViewModel<AddCategoryViewModel>()
             val transactionType = backStackEntry.arguments?.getString("transactionType")?:""
             SelectCategoriesScreen(navHostController = navHostController,addCategoryViewModel,transactionType,mainViewModel)
+
+        }
+
+        composable(
+            route = ScreenRoutes.PieChartScreen.route
+        ) {
+            val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+            val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
+
+            PieChartScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel)
 
         }
 

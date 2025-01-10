@@ -82,5 +82,10 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:1.7.6")
     implementation ("com.google.code.gson:gson:2.11.0")
 
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+
+
+
+
 
 }

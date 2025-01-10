@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,8 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -40,13 +44,11 @@ import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex33cc4d
 import com.example.expensetracker.ui.theme.Hex674b3f
-import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexdedbd4
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddAccountViewModel
-import com.google.gson.Gson
 
 
 @Composable
@@ -72,10 +74,13 @@ fun AccountScreen(
         .background(Hexddd0bf)) {
 
         TopAppBarAccountScreen(navHostController)
+        Spacer(modifier = Modifier.height(16.dp))
+        if (getAccountList.size>1){
+            CenteredTransferBox(navHostController)
 
-
-
-
+        }
+        Spacer(modifier = Modifier
+            .height(16.dp))
                 getAccountList.forEach{ item->
                     AccountItem(
                         addAccount = item,
@@ -85,14 +90,6 @@ fun AccountScreen(
                         }
                     )
                 }
-
-
-
-
-
-
-
-
     }
 
 
@@ -102,52 +99,84 @@ fun AccountScreen(
 
 
 }
+@Composable
+fun CenteredTransferBox(navHostController:NavHostController) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .clickable {
+                    navHostController.navigate(ScreenRoutes.TransferScreen.route)
+                }
+                .background(Hex33cc4d, shape = RoundedCornerShape(4.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Transfer",
+                color = Color.White,
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+            )
+        }
+    }
+}
 
 @Composable
 fun TopAppBarAccountScreen(navHostController: NavHostController){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Hexf1efe3)
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Box(
+        modifier = Modifier.shadow(
+            elevation = 4.dp,
+            shape = RectangleShape
+        )
     ) {
-        Button(
-            onClick = {  },
-            colors = ButtonDefaults.buttonColors(Color.Transparent, contentColor = Color.Transparent)) {
-            Text("")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Hexf1efe3)
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "add",
+                    tint = Hex674b3f,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clickable {
+                            navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Account"}/${""}")
+                        }
+
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Menu",
+                    tint = Hex674b3f,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+
+            }
         }
 
-
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "add",
-                tint = Hex674b3f,
-                modifier = Modifier
-                    .size(39.dp)
-                    .clickable {
-                        navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Account"}/${""}")
-                    }
-
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-/*            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Menu",
-                tint = Hex674b3f,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))*/
-
-        }
     }
-
-
 }
 
 @Composable
@@ -156,14 +185,14 @@ fun AccountItem(addAccount: AddAccount, onClick: (AddAccount) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf6f3ea)
-            .clickable { onClick(addAccount) } // Handle click
+            .clickable { onClick(addAccount) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp)
+                .padding(10.dp)
         ) {
             val selectedColor = if (addAccount.color.isEmpty()) {
                 Color.Black
@@ -179,8 +208,8 @@ fun AccountItem(addAccount: AddAccount, onClick: (AddAccount) -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = addAccount.accountName,
-                color = Hex674b3f,
-                style = TextStyle(fontSize = 16.sp)
+                color = Color.Black,
+                style = TextStyle(fontSize = 22.sp)
             )
         }
         Spacer(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,8 +32,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +56,7 @@ import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex164872
 import com.example.expensetracker.ui.theme.Hex3d3a35
+import com.example.expensetracker.ui.theme.Hex5d3724
 import com.example.expensetracker.ui.theme.Hex674b3f
 import com.example.expensetracker.ui.theme.Hex6a6762
 import com.example.expensetracker.ui.theme.Hex9e3d46
@@ -64,7 +64,7 @@ import com.example.expensetracker.ui.theme.HexFFFFFFFF
 import com.example.expensetracker.ui.theme.Hexc9c6c1
 import com.example.expensetracker.ui.theme.Hexd8d5cc
 import com.example.expensetracker.ui.theme.Hexddd0bf
-import com.example.expensetracker.ui.theme.Hexf1efe3
+import com.example.expensetracker.ui.theme.Hexe2cdb8
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
@@ -153,9 +153,10 @@ fun AddDetail( navHostController: NavHostController,
 
     var showDatePicker by remember { mutableStateOf(false) }
      val mContext= LocalContext.current
-    val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     var selectedDate by remember { mutableStateOf(currentDate) }
     var amount by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
     val taskLoaded = remember { mutableStateOf(false) }
     var category by remember { mutableStateOf("") }
     var accountName by remember { mutableStateOf("") }
@@ -196,37 +197,38 @@ fun AddDetail( navHostController: NavHostController,
         clickedButton.value=mainViewModel.selectedTransactionType
     }
 
-    TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Hexf1efe3,
-            titleContentColor = Color.White
-        ),
-        title = { Text("") },
-        navigationIcon = {
-            IconButton(onClick = { navHostController.popBackStack()}) {
-                Icon(
-                    painter = painterResource(R.drawable.close),
-                    contentDescription = "close",
-                    tint = Hex674b3f,
-                    modifier = Modifier.size(35.dp)
-                )
-            }
-        },
-        actions = {
-            TextButton(onClick = {
-                if (amount.isEmpty()){
-                    Toast.makeText(mContext, "Enter amount", Toast.LENGTH_SHORT).show()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(android.graphics.Color.parseColor("#f1efe3")))
+            .padding(start = 14.dp, end = 16.dp, top = 5.dp, bottom = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { navHostController.popBackStack()}) {
+            Icon(
+                painter = painterResource(R.drawable.close),
+                contentDescription = "close",
+                tint = Hex674b3f,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+
+        TextButton(onClick = {
+            if (amount.isEmpty()){
+                Toast.makeText(mContext, "Enter amount", Toast.LENGTH_SHORT).show()
+            }else
+                if (category.isEmpty()){
+                    Toast.makeText(mContext, "select category", Toast.LENGTH_SHORT).show()
                 }else
-                    if (category.isEmpty()){
-                        Toast.makeText(mContext, "select category", Toast.LENGTH_SHORT).show()
-                    }else
                     if (!isAmountInt(amount)){
                         Toast.makeText(mContext, "Please enter amount in number", Toast.LENGTH_SHORT).show()
                     } else {
                         val addTransactionModel = TransactionModel(date=selectedDate,category=category,
                             amount = amount, account = accountName,
                             type = clickedButton.value,
-                            createdAt = formatToMonthYear(selectedDate))
+                            note = note)
 
                         if (accountId.toInt()>0){
                             val updatedTransaction = addTransactionModel.copy(id = accountId.toInt())
@@ -240,15 +242,19 @@ fun AddDetail( navHostController: NavHostController,
                         navHostController.popBackStack()
                     }
 
-            }) {
-                Text("Done", color = Hex674b3f)
-            }
-        },
-    )
+        }) {
+            Text(
+                text = "Done",
+                color = Hex5d3724
+            )
+        }
+
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(10.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -258,7 +264,7 @@ fun AddDetail( navHostController: NavHostController,
                 mainViewModel.selectedTransactionType = "expense"
             },
             colors = ButtonDefaults.buttonColors(if (clickedButton.value == "expense") Hex674b3f else Color.Transparent,
-                contentColor = if (clickedButton.value == "expense") Color.White else Hex674b3f
+                contentColor = if (clickedButton.value == "expense") Hexe2cdb8 else Hex674b3f
             ),
             border = BorderStroke(1.dp, Hex674b3f),
             shape = RoundedCornerShape(
@@ -277,7 +283,7 @@ fun AddDetail( navHostController: NavHostController,
                 mainViewModel.selectedTransactionType = "income"
             },
             colors = ButtonDefaults.buttonColors(if (clickedButton.value == "income") Hex674b3f else Color.Transparent,
-                contentColor = if (clickedButton.value == "income") Color.White else Hex674b3f
+                contentColor = if (clickedButton.value == "income") Hexe2cdb8 else Hex674b3f
             ),
             border = BorderStroke(1.dp, Hex674b3f),
             shape = RoundedCornerShape(
@@ -291,14 +297,28 @@ fun AddDetail( navHostController: NavHostController,
         }
     }
 
+    Spacer(
+        modifier = Modifier
+            .height(1.dp)
+            .background(Hexc9c6c1)
+            .fillMaxWidth()
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexd8d5cc)
     ){
-        Text("Transaction Details", modifier = Modifier.padding(start = 16.dp, top = 5.dp, bottom = 5.dp), color = Hex6a6762)
+        Text("Transaction Details",
+            modifier = Modifier
+                .padding(start = 16.dp, top = 2.dp, bottom = 2.dp),
+            color = Hex6a6762)
     }
-
+    Spacer(
+        modifier = Modifier
+            .height(1.dp)
+            .background(Hexc9c6c1)
+            .fillMaxWidth()
+    )
 
     Column(
         modifier = Modifier
@@ -314,14 +334,14 @@ fun AddDetail( navHostController: NavHostController,
                 text = "Date",
                 color = Hex164872,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                     .weight(0.30f),
                 textAlign = TextAlign.End
             )
 
             Spacer(
                 modifier = Modifier
-                    .height(34.dp)
+                    .height(40.dp)
                     .width(1.dp)
                     .background(Hexc9c6c1)
             )
@@ -330,7 +350,7 @@ fun AddDetail( navHostController: NavHostController,
                 text = selectedDate,
                 color = Hex3d3a35,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 5.dp)
                     .weight(0.70f)
                     .clickable {
                         showDatePicker = true
@@ -378,23 +398,23 @@ fun AddDetail( navHostController: NavHostController,
                 text = "Category",
                 color = Hex164872,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                     .weight(0.30f),
                 textAlign = TextAlign.End
             )
 
             Spacer(
                 modifier = Modifier
-                    .height(34.dp)
+                    .height(40.dp)
                     .width(1.dp)
                     .background(Hexc9c6c1)
             )
 
             Text(
                 text = (category.ifEmpty { "Not Selected" }),
-                color = Hex3d3a35,
+                color =  if (category.isEmpty())Hexc9c6c1  else  Hex3d3a35   ,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
                     .weight(0.70f)
                     .clickable {
                         navHostController.navigate("${ScreenRoutes.SelectCategoriesScreen.route}/${clickedButton.value}")
@@ -417,48 +437,62 @@ fun AddDetail( navHostController: NavHostController,
                 text = "Amount",
                 color = Hex164872,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                     .weight(0.30f),
                 textAlign = TextAlign.End
             )
 
             Spacer(
                 modifier = Modifier
-                    .height(34.dp)
+                    .height(40.dp)
                     .width(1.dp)
                     .background(Hexc9c6c1)
             )
+
+
+
+
             BasicTextField(
                 modifier = Modifier
                     .weight(0.70f)
-                    .padding(5.dp),
-                value = amount,
+                    .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
+                    .fillMaxWidth(),
+                value =amount,
                 onValueChange = { newAmount ->
                     amount = newAmount.filter { it.isDigit()
                     }
                     mainViewModel.enteredAmount=newAmount
 
                 },
-                textStyle = TextStyle(color = Hex3d3a35),
+                textStyle = TextStyle(
+                    color = Hex3d3a35,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Start
+                ),
                 singleLine = true,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
-                            .background(Color.Transparent),
-                        contentAlignment = Alignment.CenterStart
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .padding(vertical = 1.dp)
                     ) {
                         if (amount.isEmpty()) {
                             Text(
                                 text = "Enter Amount",
                                 color = Hexc9c6c1,
+                                modifier = Modifier.align(Alignment.CenterStart),
+                                style = TextStyle(fontSize = 16.sp)
                             )
                         }
                         innerTextField()
                     }
                 }
             )
+
+
+
 
         }
 
@@ -478,14 +512,14 @@ fun AddDetail( navHostController: NavHostController,
                 text = "Account",
                 color = Hex164872,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                     .weight(0.30f),
                 textAlign = TextAlign.End
             )
 
             Spacer(
                 modifier = Modifier
-                    .height(34.dp)
+                    .height(40.dp)
                     .width(1.dp)
                     .background(Hexc9c6c1)
             )
@@ -494,7 +528,7 @@ fun AddDetail( navHostController: NavHostController,
                 text = accountName,
                 color = Hex3d3a35,
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
                     .weight(0.70f)
                     .clickable {
                         showColorPicker = true
@@ -527,11 +561,86 @@ fun AddDetail( navHostController: NavHostController,
     }
 
 
-}
+
+
+        Spacer(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .height(1.dp)
+                .background(Color.Transparent)
+                .fillMaxWidth()
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Hexf6f3ea)
+
+        ) {
+            Text(
+                text = "Note",
+                color = Hex164872,
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
+                    .weight(0.30f),
+                textAlign = TextAlign.End
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(1.dp)
+                    .background(Hexc9c6c1)
+            )
+
+            BasicTextField(
+                modifier = Modifier
+                    .weight(0.70f)
+                    .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
+                    .fillMaxWidth(),
+                value = note,
+                onValueChange = { newAmount ->
+                    note = newAmount
+                },
+                textStyle = TextStyle(
+                    color = Hex3d3a35,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Start
+                ),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .padding(vertical = 1.dp)
+                    ) {
+                        if (note.isEmpty()) {
+                            Text(
+                                text = "No Note Entered",
+                                color = Hexc9c6c1,
+                                modifier = Modifier.align(Alignment.CenterStart),
+                                style = TextStyle(fontSize = 16.sp)
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+
+        }
+
+
+    }
+
+
+
+
 
 
 fun formatToMonthYear(dateString: String): String {
-    val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val date = LocalDate.parse(dateString, dateFormat)
     val month = date.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
     val year = date.year
@@ -579,9 +688,7 @@ fun SelectAccount(
                                     addAccountViewModel.updateAccountTypeRecord(
                                         it.id,true)
                                 }
-                                println("CHECK_TAG_SELECTED_ACCOUNT_ " + Gson().toJson(selectedAccount) )
 
-                                println("CHECK_TAG_CLICKED_ACCOUNT_ " + Gson().toJson(account) )
 
                                 selectedAccount = account
                                 onAccountSelected(account)

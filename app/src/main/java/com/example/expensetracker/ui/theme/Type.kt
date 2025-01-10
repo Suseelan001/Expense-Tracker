@@ -37,25 +37,93 @@ val Typography = Typography(
 )
 
 
-var HonchokomonoWithHexe0e0e018sp: TextStyle = TextStyle(
-    fontFamily = FontFamily(Font(R.font.honchokomono_italic_ight)),
+var NotoSerifWithHexe0e0e018sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
     fontWeight = FontWeight.Normal,
     fontSize = 18.sp,
     letterSpacing = TextUnit.Unspecified,
     color = Hexe0e0e0
 )
 
-var HonchokomonoWithHexe0e0e020sp: TextStyle = TextStyle(
-    fontFamily = FontFamily(Font(R.font.honchokomono_italic_ight)),
+var NotoSerifWithHexe0e0e020sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
     fontWeight = FontWeight.Normal,
     fontSize = 20.sp,
     letterSpacing = TextUnit.Unspecified,
     color = Hexe0e0e0
 )
-var HonchokomonoWithHex674b3f18sp: TextStyle = TextStyle(
-    fontFamily = FontFamily(Font(R.font.honchokomono_italic_ight)),
+var NotoSerifWithHex9e3d4620sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
     fontWeight = FontWeight.Normal,
     fontSize = 20.sp,
     letterSpacing = TextUnit.Unspecified,
-    color = Hex674b3f
+    color = Hex9e3d46
+)
+
+var NotoSerifWithHexb7efca20sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hexb7efca
+)
+var NotoSerifWithHex33cc4d20sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hex33cc4d
+)
+
+var NotoSerifWithHexc6787120sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hexc67871
+)
+
+var NotoSerifWithHex7fcbe920sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hex7fcbe9
+)
+
+
+var NotoSerifWithHex39393920sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hex393939
+)
+
+var NotoSerifWithHex5d372418sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 18.sp,
+    color = Hex5d3724
+)
+var NotoSerifWithHexFFFFFFFF18sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 18.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = HexFFFFFFFF
+)
+var NotoSerifWithHexHexdfc47418sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 18.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hexdfc474
+)
+var NotoSerifWithHexc1941020sp: TextStyle = TextStyle(
+    fontFamily = FontFamily(Font(R.font.notoserif_regular)),
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    letterSpacing = TextUnit.Unspecified,
+    color = Hexc19410
 )

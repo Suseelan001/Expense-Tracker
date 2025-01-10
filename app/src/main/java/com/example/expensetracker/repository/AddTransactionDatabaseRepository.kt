@@ -8,6 +8,7 @@ import com.example.expensetracker.database.TransactionDAO
 import com.example.expensetracker.model.TransactionModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,13 +54,21 @@ class AddTransactionDatabaseRepository @Inject constructor(
         return taskDao.getAllRecord()
     }
 
-    fun getRecordsByType(account:String): LiveData<List<TransactionModel>> {
-        return taskDao.getRecordsByType(account)
+
+
+    fun getRecordsByDateRange(account: String, startDate: String, endDate: String): LiveData<List<TransactionModel>> {
+
+        return taskDao.getRecordsByDateRange(account, startDate, endDate)
     }
 
-    fun getRecordsByTypeAndMonth(account:String,monthYear:String): LiveData<List<TransactionModel>> {
-        return taskDao.getRecordsByTypeAndMonth(account,monthYear)
+    fun getRecordsByDateRangeAndCategoryType(account: String, startDate: String, endDate: String, categoryType: String): LiveData<List<TransactionModel>> {
+        return taskDao.getRecordsByDateRangeAndCategoryType(account, startDate, endDate,categoryType)
     }
+
+    fun getRecordsByDateRangeAndTransactionType(account: String, startDate: String, endDate: String, transactionType: String): LiveData<List<TransactionModel>> {
+        return taskDao.getRecordsByDateRangeAndTransactionType(account, startDate, endDate,transactionType)
+    }
+
 
 
 }

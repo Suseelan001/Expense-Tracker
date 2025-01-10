@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,8 +47,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
@@ -117,7 +121,8 @@ fun AddAccountScreen(
         ) {
             Text(
                 "$screenType Detail",
-                modifier = Modifier.padding(start = 16.dp, top = 5.dp, bottom = 5.dp),
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 2.dp, bottom = 2.dp),
                 color = Hex6a6762
             )
         }
@@ -136,44 +141,57 @@ fun AddAccountScreen(
                     text = "Name",
                     color = Hex164872,
                     modifier = Modifier
-                        .padding(5.dp)
+                        .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                         .weight(0.30f),
                     textAlign = TextAlign.End
                 )
 
                 Spacer(
                     modifier = Modifier
-                        .height(34.dp)
+                        .height(40.dp)
                         .width(1.dp)
                         .background(Hexc9c6c1)
                 )
 
+
+
+
                 BasicTextField(
                     modifier = Modifier
                         .weight(0.70f)
-                        .padding(5.dp),
+                        .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
+                        .fillMaxWidth(),
                     value = name,
                     onValueChange = { newAmount ->
                         name = newAmount
                     },
-                    textStyle = TextStyle(color = Hex3d3a35),
+                    textStyle = TextStyle(
+                        color = Hex3d3a35,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Start
+                    ),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     decorationBox = { innerTextField ->
                         Box(
                             modifier = Modifier
-                                .background(Color.Transparent),
-                            contentAlignment = Alignment.CenterStart
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .padding(vertical = 1.dp)
                         ) {
                             if (name.isEmpty()) {
                                 Text(
-                                    text = "Enter Name",
+                                    text = "Name",
                                     color = Hexc9c6c1,
+                                    modifier = Modifier.align(Alignment.CenterStart),
+                                    style = TextStyle(fontSize = 16.sp)
                                 )
                             }
                             innerTextField()
                         }
                     }
                 )
+
             }
 
             Spacer(
@@ -192,13 +210,13 @@ fun AddAccountScreen(
                     text = "Colour",
                     color = Hex164872,
                     modifier = Modifier
-                        .padding(5.dp)
+                        .padding(top = 8.dp, bottom = 8.dp, end = 8.dp)
                         .weight(0.30f),
                     textAlign = TextAlign.End
                 )
                 Spacer(
                     modifier = Modifier
-                        .height(34.dp)
+                        .height(40.dp)
                         .width(1.dp)
                         .background(Hexc9c6c1)
                 )
@@ -208,7 +226,7 @@ fun AddAccountScreen(
                         text = "Select color",
                         color = Hex164872,
                         modifier = Modifier
-                            .padding(5.dp)
+                            .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
                             .weight(0.70f)
                             .clickable { showColorPicker = true },
                         textAlign = TextAlign.Start
@@ -266,7 +284,6 @@ fun AddAccountScreen(
         Spacer(modifier = Modifier
             .padding(top = 16.dp))
 
-        println("CHECK_TAG_PRIMARY_ACCOUNT___ $primaryAccount")
         if (accountId.toInt()>0) {
             if (!primaryAccount){
 
@@ -321,6 +338,12 @@ fun TopAppBarAddAccount(transactionType:String
                         accountId:Int,addCategoryViewModel:AddCategoryViewModel,
                         primaryAccount:Boolean){
     val context = LocalContext.current
+
+
+
+
+
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Hexf1efe3,

@@ -12,6 +12,7 @@ data class TransactionModel(
     val amount : String,
     val account:String,
     val type:String,
-    val createdAt:String)
+    val transferType:String="plus",
+    val note:String="")
 
 
