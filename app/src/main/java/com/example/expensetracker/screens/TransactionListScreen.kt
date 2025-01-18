@@ -1,6 +1,5 @@
 package com.example.expensetracker.screens
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -45,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -108,6 +106,7 @@ fun TransactionScreen(
     val selectedCategory = remember { mutableStateOf("All Categories") }
     val selectedItems = remember { mutableStateListOf<TransactionModel>() }
     var isSelectionMode by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
 
 
@@ -255,7 +254,7 @@ fun TransactionScreen(
                 .background(Hexf1efe3)
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically // Align items vertically in the center
+            verticalAlignment = Alignment.CenterVertically
         ) {
             if (selectedItems.isEmpty()) {
                 Box(
@@ -295,8 +294,15 @@ fun TransactionScreen(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Menu",
                         tint = Hex816f64,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                expanded = !expanded
+                            }
                     )
+                    ShowDropdown(expanded = expanded, onDismissRequest = { expanded = false }, navHostController = navHostController)
+
+
                 }
             } else
 

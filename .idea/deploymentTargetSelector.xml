@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Expense__Tracker.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-01-09T12:24:12.960039500Z">
+        <DropdownSelection timestamp="2025-01-11T09:20:10.607523Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\User\.android\avd\Pixel_8a_API_35.avd" />

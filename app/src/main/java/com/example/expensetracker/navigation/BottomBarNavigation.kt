@@ -18,12 +18,18 @@ import com.example.expensetracker.screens.CategoriesScreen
 import com.example.expensetracker.screens.HomeScreen
 import com.example.expensetracker.screens.PieChartScreen
 import com.example.expensetracker.screens.SelectCategoriesScreen
+import com.example.expensetracker.screens.settingsScreenPackage.SettingsDetailToggleBoxScreen
+import com.example.expensetracker.screens.SettingsScreen
 import com.example.expensetracker.screens.TransactionScreen
 import com.example.expensetracker.screens.TransferScreen
+import com.example.expensetracker.screens.settingsScreenPackage.DropBoxScreen
+import com.example.expensetracker.screens.settingsScreenPackage.PasswordScreen
+import com.example.expensetracker.screens.settingsScreenPackage.TimePeriodScreen
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddCategoryViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.example.expensetracker.viewModel.MainViewModel
+import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 
 @Composable
 fun BottomBarNavigation(
@@ -43,8 +49,9 @@ fun BottomBarNavigation(
             composable(BottomBarRoutes.SPENDING_SCREEN.routes) {
                 val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
+                val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
 
-                HomeScreen(navHostController = navHostController,addAccountViewModel,addTransactionViewModel)
+                HomeScreen(navHostController = navHostController,addAccountViewModel,addTransactionViewModel,sharedPreferenceViewModel)
             }
             composable(BottomBarRoutes.TRANSACTIONS_SCREEN.routes) {
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
@@ -86,6 +93,44 @@ fun BottomBarNavigation(
         }
 
 
+        composable(
+            route = ScreenRoutes.SettingsScreen.route) {
+            val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+
+            SettingsScreen(navHostController = navHostController,sharedPreferenceViewModel)
+
+        }
+
+        composable(
+            route = "${ScreenRoutes.SettingsDetailToggleBoxScreen.route}/{screenTitle}",
+            arguments = listOf(navArgument("screenTitle") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val screenTitle = backStackEntry.arguments?.getString("screenTitle")?:""
+            val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+
+            SettingsDetailToggleBoxScreen(navHostController = navHostController,screenTitle,sharedPreferenceViewModel)
+
+        }
+
+        composable(
+            route = "${ScreenRoutes.TimePeriodScreen.route}/{screenTitle}",
+            arguments = listOf(navArgument("screenTitle") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val screenTitle = backStackEntry.arguments?.getString("screenTitle")?:""
+            val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+
+            TimePeriodScreen(navHostController = navHostController,screenTitle,sharedPreferenceViewModel)
+
+        }
+
+        composable(
+            route = ScreenRoutes.DropBoxScreen.route) {
+            DropBoxScreen(navHostController = navHostController)
+
+        }
+
 
 
         composable(
@@ -120,6 +165,13 @@ fun BottomBarNavigation(
             val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
 
             PieChartScreen(navHostController = navHostController,addTransactionViewModel,addAccountViewModel)
+
+        }
+        composable(
+            route = ScreenRoutes.PasswordScreen.route
+        ) {
+
+            PasswordScreen(navHostController = navHostController)
 
         }
 

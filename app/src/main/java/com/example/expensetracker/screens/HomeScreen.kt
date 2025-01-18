@@ -77,6 +77,8 @@ import com.example.expensetracker.ui.theme.NotoSerifWithHexc6787120sp
 import com.example.expensetracker.ui.theme.NotoSerifWithHexe0e0e020sp
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
+import com.example.expensetracker.viewModel.MainViewModel
+import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.Year
@@ -87,8 +89,10 @@ import java.time.format.DateTimeFormatter
 fun HomeScreen(
     navHostController: NavHostController,
     addAccountViewModel: AddAccountViewModel,
-    addTransactionViewModel: AddTransactionViewModel
-) {
+    addTransactionViewModel: AddTransactionViewModel,
+    sharedPreferenceViewModel: SharedPreferenceViewModel,
+
+    ) {
 
     SetStatusBarColor()
     val getPrimaryAccount by addAccountViewModel.getPrimaryAccount().observeAsState()
@@ -102,6 +106,8 @@ fun HomeScreen(
     val currentDate = remember { mutableStateOf(LocalDate.now()) }
     val currentYear = remember { mutableIntStateOf(Year.now().value) }
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    var expanded by remember { mutableStateOf(false) }
+
 
 
     LaunchedEffect(selectedType.value) {
@@ -165,9 +171,10 @@ fun HomeScreen(
         getPrimaryAccount?.let {
             if (accountName.value != it.accountName) {
                 accountName.value = it.accountName
-            }
+                sharedPreferenceViewModel.setPrimaryAccountName(it.accountName) }
         }
     }
+
 
     val transactionList by addTransactionViewModel
         .getRecordsByDateRange(accountName.value,startDate,endDate)
@@ -252,8 +259,14 @@ fun HomeScreen(
                          imageVector = Icons.Default.MoreVert,
                          contentDescription = "Menu",
                          tint = Hex5d3724,
-                         modifier = Modifier.size(24.dp)
+                         modifier = Modifier
+                             .size(24.dp)
+                             .clickable {
+                                 expanded = !expanded
+                             }
                      )
+                ShowDropdown(expanded = expanded, onDismissRequest = { expanded = false }, navHostController = navHostController)
+
             }
         }
 

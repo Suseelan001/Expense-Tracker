@@ -68,6 +68,7 @@ import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddCategoryViewModel
+import com.google.gson.Gson
 
 
 @Composable
@@ -110,7 +111,17 @@ fun AddAccountScreen(
         .fillMaxSize()
         .background(Hexddd0bf)) {
 
-        TopAppBarAddAccount(transactionType,screenType,navHostController,name,selectedColor,addAccountViewModel,accountId.toInt(),addCategoryViewModel,primaryAccount)
+        TopAppBarAddAccount(transactionType,
+            screenType,
+            navHostController,name,
+            selectedColor,
+            addAccountViewModel,
+            accountId.toInt(),
+            addCategoryViewModel,
+            primaryAccount)
+
+
+
         Spacer(modifier = Modifier
             .padding(top = 16.dp))
 

@@ -41,14 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AddCategory
-import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.BottomBarRoutes
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex674b3f
@@ -58,7 +55,6 @@ import com.example.expensetracker.ui.theme.Hexddd0bf
 import com.example.expensetracker.ui.theme.Hexdedbd4
 import com.example.expensetracker.ui.theme.Hexe2cdb8
 import com.example.expensetracker.ui.theme.Hexf1efe3
-import com.example.expensetracker.ui.theme.Hexf6e0c8
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.ui.theme.NotoSerifWithHex5d372418sp
 import com.example.expensetracker.viewModel.AddCategoryViewModel
@@ -118,7 +114,7 @@ fun CategoriesScreen(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clickable {
-                                    navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Category"}/${clickedButton}")
+                                    navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${"0"}/${"Category"}/${clickedButton.value}")
                                 }
                         )
 
@@ -130,10 +126,10 @@ fun CategoriesScreen(
                             tint = Hex674b3f,
                             modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
                     }
                 }
-            } else {
+            } else
+            {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -164,8 +160,8 @@ fun CategoriesScreen(
                         style = NotoSerifWithHex5d372418sp,
                         modifier = Modifier.padding(top = 6.dp, bottom = 6.dp, start = 5.dp)
                     )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                 }
+                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (selectedItems.size == 1) {
                         Icon(
                             painter = painterResource(R.drawable.edit),
@@ -201,7 +197,8 @@ fun CategoriesScreen(
                             }
                     )
                 }
-            }
+             }
+
             }
         }
         Row(
@@ -258,7 +255,6 @@ fun CategoriesScreen(
                 isSelectionMode = isSelectionMode,
                 onClick = { clickedItem ->
                     if (!isSelectionMode) {
-                        println("CHECK_TAG_ " + clickedItem.categoryType   +  "  item  " +item.categoryType)
                         navHostController.navigate("${ScreenRoutes.AddAccountScreen.route}/${clickedItem.id}/${"Category"}/${item.categoryType}")
                     }
                 },
