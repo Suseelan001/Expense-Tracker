@@ -23,8 +23,10 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.expensetracker.model.BudgetMode
+import com.example.expensetracker.model.CarryOver
+import com.example.expensetracker.model.Reminder
+import com.example.expensetracker.model.SettingsAllRecord
+import com.example.expensetracker.model.TimePeriod
 import com.example.expensetracker.ui.theme.Hex5d3724
 import com.example.expensetracker.ui.theme.Hex6a6762
 import com.example.expensetracker.ui.theme.Hex888888
@@ -43,6 +50,7 @@ import com.example.expensetracker.ui.theme.Hexded1c0
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.ui.theme.NotoSerifWithHex39393920sp
 import com.example.expensetracker.ui.theme.NotoSerifWithHex5d372418sp
+import com.example.expensetracker.viewModel.SettingsAllRecordViewModel
 import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 
 
@@ -50,20 +58,39 @@ import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 fun TimePeriodScreen(
     navHostController: NavHostController,
     screenTitle:String,
-    sharedPreferenceViewModel: SharedPreferenceViewModel
+    settingsRecordId:String,
+    sharedPreferenceViewModel: SharedPreferenceViewModel,
+    settingsAllRecordViewModel: SettingsAllRecordViewModel
 ){
     var showAlertDialog by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf(""  ) }
 
-    val selectedPeriodList = remember { mutableStateOf("Yearly") }
-    val selectedDaysList = remember { mutableStateOf("1") }
-    val selectedWeekList = remember { mutableStateOf("Monday") }
+    val selectedPeriodList = remember { mutableStateOf("") }
+    val selectedDaysList = remember { mutableStateOf("") }
+    val selectedWeekList = remember { mutableStateOf("") }
 
 
     val periodList = listOf("Daily", "Weekly", "Monthly", "Yearly")
     val daysList = List(31) { (it + 1).toString() }
     val weekList = listOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
 
+
+    val primaryAccountName = sharedPreferenceViewModel.getPrimaryAccountName()
+
+    if (!primaryAccountName.isNullOrEmpty()) {
+        val getAccountRecord by settingsAllRecordViewModel
+            .getSingleRecord(primaryAccountName)
+            .observeAsState()
+
+        LaunchedEffect(getAccountRecord) {
+            getAccountRecord?.let { record ->
+                selectedPeriodList.value = record.timePeriod.spending
+                selectedDaysList.value =  record.timePeriod.monthStart
+                selectedWeekList.value =  record.timePeriod.weekStartDay
+
+            }
+        }
+    }
 
 
     Column(
@@ -178,15 +205,17 @@ fun TimePeriodScreen(
             categoryList = currentList,
             onDismiss = { showAlertDialog = false },
             selectedType = when (selectedItem) {
+                "Period" -> selectedPeriodList
+
                 "Date" -> selectedDaysList
                 "Week" -> selectedWeekList
-                "Period" -> selectedPeriodList
                 else -> remember { mutableStateOf("") }
             }
         )
     }
-
 }
+
+
 
 @Composable
 fun SelectAlertDialog(

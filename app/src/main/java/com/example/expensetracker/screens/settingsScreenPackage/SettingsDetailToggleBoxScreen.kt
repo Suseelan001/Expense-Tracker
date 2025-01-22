@@ -22,7 +22,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,7 +49,7 @@ import com.example.expensetracker.ui.theme.Hexded1c0
 import com.example.expensetracker.ui.theme.Hexf1efe3
 import com.example.expensetracker.ui.theme.Hexf6f3ea
 import com.example.expensetracker.ui.theme.NotoSerifWithHex5d372418sp
-import com.example.expensetracker.viewModel.MainViewModel
+import com.example.expensetracker.viewModel.SettingsAllRecordViewModel
 import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 
 
@@ -55,11 +57,32 @@ import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 fun SettingsDetailToggleBoxScreen(
     navHostController: NavHostController,
     screenTitle:String,
-    sharedPreferenceViewModel: SharedPreferenceViewModel
+    settingsRecordId:String,
+    sharedPreferenceViewModel: SharedPreferenceViewModel,
+    settingsAllRecordViewModel: SettingsAllRecordViewModel
 ){
     val newTitle = remember { mutableStateOf("") }
     var budgetAmount by remember { mutableStateOf("") }
     var isChecked by remember { mutableStateOf(false) }
+
+    val primaryAccountName = sharedPreferenceViewModel.getPrimaryAccountName()
+
+    if (!primaryAccountName.isNullOrEmpty()) {
+        val getAccountRecord by settingsAllRecordViewModel
+            .getSingleRecord(primaryAccountName)
+            .observeAsState()
+
+        LaunchedEffect(getAccountRecord) {
+            getAccountRecord?.let { record ->
+                if (screenTitle.contains("hide future", ignoreCase = true)) {
+                    isChecked = record.hideFuture
+
+                }else if (screenTitle.contains("Show Transaction Note", ignoreCase = true)) {
+                    isChecked = record.showTransactionNote
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -105,6 +128,7 @@ fun SettingsDetailToggleBoxScreen(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(50.dp)
             .background(Hexf6f3ea)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -116,7 +140,16 @@ fun SettingsDetailToggleBoxScreen(
             newTitle.value=screenTitle
         }
         Text(text = newTitle.value, modifier = Modifier.weight(1f), color = Hexd124a83)
-        androidx.compose.material.Switch(checked = isChecked, onCheckedChange = {isChecked = it})
+
+        androidx.compose.material.Switch(checked = isChecked, onCheckedChange = {
+            isChecked = it
+            if (screenTitle.contains("hide future", ignoreCase = true)) {
+                settingsAllRecordViewModel.updateTimePeriod(settingsRecordId.toInt(),it)
+            } else if (screenTitle.contains("Show Transaction Note", ignoreCase = true)) {
+                settingsAllRecordViewModel.updateShowTransaction(settingsRecordId.toInt(),it)
+
+
+            }            })
 
     }
     HorizontalDivider(thickness = 1.dp, color = Hexc9c6c1)
@@ -126,6 +159,7 @@ if (isChecked && screenTitle=="Budget Mode"){
         modifier = Modifier
             .fillMaxWidth()
             .background(Hexf6f3ea)
+            .height(50.dp)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -169,6 +203,7 @@ if (isChecked && screenTitle=="Budget Mode"){
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(50.dp)
             .background(Hexf6f3ea)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically

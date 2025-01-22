@@ -31,7 +31,7 @@ import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 
 @Composable
 fun DropBoxScreen(
-    navHostController: NavHostController){
+    navHostController: NavHostController,screenTitle:String){
 
 
     Column(
@@ -40,7 +40,7 @@ fun DropBoxScreen(
             .fillMaxHeight()
             .background(Hexded1c0)
     ) {
-        SettingsDetailTSHeaderRow(navHostController, "Automatic Syncing")
+        SettingsDetailTSHeaderRow(navHostController, screenTitle)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -69,20 +69,25 @@ fun DropBoxScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = { /* Handle Link action */ },
-                colors = ButtonDefaults.buttonColors(Color(0xFF00B14F)),
-                shape = RoundedCornerShape(4.dp),
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = "De-duplicate",
-                    color = Color.White,
-                )
+            if (screenTitle!="Automatic Backup"){
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = { /* Handle Link action */ },
+                    colors = ButtonDefaults.buttonColors(Color(0xFF00B14F)),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "De-duplicate",
+                        color = Color.White,
+                    )
+                }
+
             }
+
+
         }
     }
 

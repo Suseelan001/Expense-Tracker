@@ -14,5 +14,6 @@ sealed class ScreenRoutes(val route: String) {
     data object TimePeriodScreen : ScreenRoutes("TIME_PERIOD_SCREEN")
     data object DropBoxScreen : ScreenRoutes("DROP_BOX_SCREEN")
     data object PasswordScreen : ScreenRoutes("PASSWORD_SCREEN")
+    data object ReminderScreen : ScreenRoutes("REMINDER_SCREEN")
 
 }

@@ -24,11 +24,13 @@ import com.example.expensetracker.screens.TransactionScreen
 import com.example.expensetracker.screens.TransferScreen
 import com.example.expensetracker.screens.settingsScreenPackage.DropBoxScreen
 import com.example.expensetracker.screens.settingsScreenPackage.PasswordScreen
+import com.example.expensetracker.screens.settingsScreenPackage.ReminderScreen
 import com.example.expensetracker.screens.settingsScreenPackage.TimePeriodScreen
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddCategoryViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
 import com.example.expensetracker.viewModel.MainViewModel
+import com.example.expensetracker.viewModel.SettingsAllRecordViewModel
 import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 
 @Composable
@@ -50,8 +52,9 @@ fun BottomBarNavigation(
                 val addAccountViewModel = hiltViewModel<AddAccountViewModel>()
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
                 val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+                val settingsAllRecordViewModel = hiltViewModel<SettingsAllRecordViewModel>()
 
-                HomeScreen(navHostController = navHostController,addAccountViewModel,addTransactionViewModel,sharedPreferenceViewModel)
+                HomeScreen(navHostController = navHostController,addAccountViewModel,addTransactionViewModel,sharedPreferenceViewModel,settingsAllRecordViewModel)
             }
             composable(BottomBarRoutes.TRANSACTIONS_SCREEN.routes) {
                 val addTransactionViewModel = hiltViewModel<AddTransactionViewModel>()
@@ -96,38 +99,55 @@ fun BottomBarNavigation(
         composable(
             route = ScreenRoutes.SettingsScreen.route) {
             val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+            val settingsAllRecordViewModel = hiltViewModel<SettingsAllRecordViewModel>()
 
-            SettingsScreen(navHostController = navHostController,sharedPreferenceViewModel)
+            SettingsScreen(navHostController = navHostController,sharedPreferenceViewModel,settingsAllRecordViewModel)
 
         }
 
         composable(
-            route = "${ScreenRoutes.SettingsDetailToggleBoxScreen.route}/{screenTitle}",
+            route = "${ScreenRoutes.SettingsDetailToggleBoxScreen.route}/{screenTitle}/{settingsRecordId}",
             arguments = listOf(navArgument("screenTitle") { type = NavType.StringType })
         ) { backStackEntry ->
 
             val screenTitle = backStackEntry.arguments?.getString("screenTitle")?:""
+            val settingsRecordId = backStackEntry.arguments?.getString("settingsRecordId")?:"0"
             val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+            val settingsAllRecordViewModel = hiltViewModel<SettingsAllRecordViewModel>()
 
-            SettingsDetailToggleBoxScreen(navHostController = navHostController,screenTitle,sharedPreferenceViewModel)
+            SettingsDetailToggleBoxScreen(navHostController = navHostController,screenTitle,settingsRecordId,sharedPreferenceViewModel,settingsAllRecordViewModel)
 
         }
 
         composable(
-            route = "${ScreenRoutes.TimePeriodScreen.route}/{screenTitle}",
+            route = "${ScreenRoutes.TimePeriodScreen.route}/{screenTitle}/{settingsRecordId}",
             arguments = listOf(navArgument("screenTitle") { type = NavType.StringType })
         ) { backStackEntry ->
 
             val screenTitle = backStackEntry.arguments?.getString("screenTitle")?:""
+            val settingsRecordId = backStackEntry.arguments?.getString("settingsRecordId")?:""
             val sharedPreferenceViewModel = hiltViewModel<SharedPreferenceViewModel>()
+            val settingsAllRecordViewModel = hiltViewModel<SettingsAllRecordViewModel>()
 
-            TimePeriodScreen(navHostController = navHostController,screenTitle,sharedPreferenceViewModel)
+            TimePeriodScreen(navHostController = navHostController,screenTitle,settingsRecordId,sharedPreferenceViewModel,settingsAllRecordViewModel)
 
         }
 
         composable(
-            route = ScreenRoutes.DropBoxScreen.route) {
-            DropBoxScreen(navHostController = navHostController)
+            route = "${ScreenRoutes.DropBoxScreen.route}/{screenTitle}",
+            arguments = listOf(navArgument("screenTitle") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val screenTitle = backStackEntry.arguments?.getString("screenTitle")?:""
+
+            DropBoxScreen(navHostController = navHostController,screenTitle)
+
+        }
+
+
+        composable(
+            route = ScreenRoutes.ReminderScreen.route) {
+            ReminderScreen(navHostController = navHostController)
 
         }
 

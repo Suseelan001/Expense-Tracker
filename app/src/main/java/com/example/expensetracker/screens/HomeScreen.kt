@@ -59,6 +59,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AddAccount
+import com.example.expensetracker.model.BudgetMode
+import com.example.expensetracker.model.CarryOver
+import com.example.expensetracker.model.Reminder
+import com.example.expensetracker.model.SettingsAllRecord
+import com.example.expensetracker.model.TimePeriod
 import com.example.expensetracker.model.TransactionModel
 import com.example.expensetracker.navigation.ScreenRoutes
 import com.example.expensetracker.ui.theme.Hex2b2b2b
@@ -77,7 +82,7 @@ import com.example.expensetracker.ui.theme.NotoSerifWithHexc6787120sp
 import com.example.expensetracker.ui.theme.NotoSerifWithHexe0e0e020sp
 import com.example.expensetracker.viewModel.AddAccountViewModel
 import com.example.expensetracker.viewModel.AddTransactionViewModel
-import com.example.expensetracker.viewModel.MainViewModel
+import com.example.expensetracker.viewModel.SettingsAllRecordViewModel
 import com.example.expensetracker.viewModel.SharedPreferenceViewModel
 import java.text.DecimalFormat
 import java.time.LocalDate
@@ -91,6 +96,7 @@ fun HomeScreen(
     addAccountViewModel: AddAccountViewModel,
     addTransactionViewModel: AddTransactionViewModel,
     sharedPreferenceViewModel: SharedPreferenceViewModel,
+    settingsAllRecordViewModel: SettingsAllRecordViewModel
 
     ) {
 
@@ -171,9 +177,23 @@ fun HomeScreen(
         getPrimaryAccount?.let {
             if (accountName.value != it.accountName) {
                 accountName.value = it.accountName
-                sharedPreferenceViewModel.setPrimaryAccountName(it.accountName) }
+                sharedPreferenceViewModel.setPrimaryAccountName(it.accountName)
+                val settingsAllRecord = SettingsAllRecord(
+                    accountName = it.accountName,
+                    timePeriod = TimePeriod(),
+                    budgetMode = BudgetMode(),
+                    carryOver = CarryOver(),
+                    reminder = Reminder()
+                )
+
+                settingsAllRecordViewModel.insertAccount(settingsAllRecord)
+
+            }
         }
     }
+
+
+
 
 
     val transactionList by addTransactionViewModel
